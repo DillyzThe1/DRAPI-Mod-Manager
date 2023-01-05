@@ -16,6 +16,11 @@ void render() {
 	window.display();
 }
 
+// this function will check if you're downloading/copying/installing anything and then close the window if not
+void close() {
+	window.close();
+}
+
 int main() {
 	cout << "There is a pipebomb in your mailbox.\n";
 
@@ -28,12 +33,12 @@ int main() {
 		while (window.pollEvent(e)) {
 			switch (e.type) {
 				case Event::Closed:
-					window.close();
+					close();
 					break;
 				case Event::KeyPressed:
 					switch (e.key.code) {
 						case Keyboard::Escape:
-							window.close();
+							close();
 							break;
 					}
 					break;
