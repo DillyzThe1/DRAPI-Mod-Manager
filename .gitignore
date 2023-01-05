@@ -7,3 +7,4 @@ DRAPI-Mod-Manager/dlls/**/**.dll
 *.aps
 enc_temp_folder/*
 Debug/*
+RECOVER_*.fla

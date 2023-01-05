@@ -1,0 +1,1 @@
+certutil -hashfile "Among Us.exe" MD5

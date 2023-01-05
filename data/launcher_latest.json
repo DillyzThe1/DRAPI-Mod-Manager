@@ -1,0 +1,38 @@
+{
+	"version": 0,
+	"mailbox": "mind blown",
+	"bepinex_vers": 0,
+	"bepinex": "https://builds.bepinex.dev/projects/bepinex_be/577/BepInEx_UnityIL2CPP_x86_ec79ad0_6.0.0-be.577.zip",
+	"auvers": "2022.12.14",
+	"auhash": "908fe1e7366c7e7d44d385c0e47fad50",
+	"mods": [
+		{
+			"name": "DillyzRoleApi",
+			"file": "https://github.com/DillyzThe1/DillyzRoleApi-Rewritten/raw/main/notes%20n%20stuff/DillyzRoleApi-Rewritten-Latest-Commit.dll",
+			"banner": "https://raw.githubusercontent.com/DillyzThe1/DRAPI-Mod-Manager/main/data/banners/api.png",
+			"bannerhash": "4ebd41ef25b01f1f07d5248114cf9b89",
+			"version": 0,
+			"versionname": "v2.1.0",
+			"description": "A huge API that improves Among Us for users and modders!\nMake roles in minutes!",
+			"author": "DillyzThe1",
+			"dependencies": []
+		},
+		{
+			"name": "ClassicRolePackage",
+			"file": "https://cdn.discordapp.com/attachments/807081464894062612/1060692764712505516/ClassicRolePackage.dll",
+			"banner": "https://raw.githubusercontent.com/DillyzThe1/DRAPI-Mod-Manager/main/data/banners/legacy.png",
+			"bannerhash": "8a414cabe8af6ad98fd0b83dfb96f9d3",
+			"version": 0,
+			"versionname": "v1.1.0",
+			"description": "3 classic roles in one brand new package!",
+			"author": "DillyzThe1",
+			"dependencies": [
+				{
+					"name": "DillyzRoleApi",
+					"version": 0,
+					"versionname": "v2.1.0"
+				}
+			]
+		}
+	]
+}
