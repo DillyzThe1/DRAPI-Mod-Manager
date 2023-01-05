@@ -6,3 +6,4 @@ DRAPI-Mod-Manager/x64/*
 DRAPI-Mod-Manager/dlls/**/**.dll
 *.aps
 enc_temp_folder/*
+Debug/*
