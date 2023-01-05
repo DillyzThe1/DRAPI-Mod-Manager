@@ -20,11 +20,28 @@
 		{
 			"name": "ClassicRolePackage",
 			"file": "https://cdn.discordapp.com/attachments/807081464894062612/1060692764712505516/ClassicRolePackage.dll",
-			"banner": "https://raw.githubusercontent.com/DillyzThe1/DRAPI-Mod-Manager/main/data/banners/legacy.png",
-			"bannerhash": "8a414cabe8af6ad98fd0b83dfb96f9d3",
+			"banner": "",
+			"bannerhash": "",
 			"version": 0,
 			"versionname": "v1.1.0",
 			"description": "3 classic roles in one brand new package!",
+			"author": "DillyzThe1",
+			"dependencies": [
+				{
+					"name": "DillyzRoleApi",
+					"version": 0,
+					"versionname": "v2.1.0"
+				}
+			]
+		},
+		{
+			"name": "DillyzLegacyPack",
+			"file": "https://cdn.discordapp.com/attachments/807081464894062612/1060692765106782250/DillyzLegacyPack.dll",
+			"banner": "https://raw.githubusercontent.com/DillyzThe1/DRAPI-Mod-Manager/main/data/banners/legacy.png",
+			"bannerhash": "8a414cabe8af6ad98fd0b83dfb96f9d3",
+			"version": 0,
+			"versionname": "v1.0.0",
+			"description": "3 of the original Dillyz roles alongside 1 brand new reimagined mod as a role!",
 			"author": "DillyzThe1",
 			"dependencies": [
 				{
