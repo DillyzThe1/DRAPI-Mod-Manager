@@ -19,7 +19,7 @@ using namespace std::filesystem;
 using json = nlohmann::json;
 
 VideoMode video(1280, 720);
-RenderWindow window(video, "DRAPI Mod Manager for Among Us");
+RenderWindow window(video, "DRAPI Mod Manager for Among Us", Style::Default, ContextSettings::ContextSettings(0, 0, 4, 1, 1, 0, false));
 LPCWSTR titlebutgoofy = L"DRAPI Mod Manager for Among Us";
 
 enum StateType {
@@ -30,7 +30,7 @@ enum StateType {
 	Progress  // the download progress screen, where you'll be until something finishes installing
 };
 
-Color bgcolor(15, 10, 25, 255);
+Color bgcolor(15, 10, 25, 255), white(255, 255, 255, 255), selected(0, 255, 0, 255);
 StateType curState = Title;
 
 string launcherdataURL = "https://cdn.discordapp.com/attachments/849292573230104576/1060836092003225681/launcher_latest.json";
@@ -59,6 +59,19 @@ void saveuserdata() {
 	ofstream writeee(userdatapath.string());
 	writeee << userdata.dump(4);
 	writeee.close();
+}
+
+FloatRect vz;
+Vector2i getMousePos() {
+	//if (!window.hasFocus())
+	//	return Vector2i(-100, -100);
+	Vector2i mp = Mouse::getPosition();
+	Vector2i wp = window.getPosition();
+	Vector2u ws = window.getSize();
+	Vector2i smp = Vector2i(mp.x - wp.x - 8, mp.y - wp.y - 30);
+	Vector2f perc = Vector2f((double)smp.x/(double)ws.x, (double)smp.y/(double)ws.y);
+	Vector2i mpiw = Vector2i(vz.width * perc.x, vz.height * perc.y);
+	return mpiw;
 }
 
 /*struct ModDependencyData {
@@ -98,10 +111,29 @@ string fixwstr(wstring& ogstr) {
 	return newstr;
 }
 
-void switchstate(StateType newstate) {
-	cout << "New state " << newstate << " found.\n";
-	StateType oldState = curState;
-	curState = newstate;
+int width = 1280, height = 720;
+void reposscene() {
+	float centx = width / 2, centy = height / 2;
+	switch (curState) {
+		case Setup:
+			break;
+		case Title:
+			break;
+		case Main: {
+				mm_logo.setPosition(Vector2f(centx - mm_logotex.getSize().x / 2, centy - mm_logotex.getSize().y - 25));
+
+				int offset = -(192/2);
+				mm_button_launch.setPosition(Vector2f(centx - 100 + offset, centy));
+				mm_button_mods.setPosition(Vector2f(centx + 100 + offset, centy));
+				mm_button_reinstall.setPosition(Vector2f(centx - 100 + offset, centy + 90));
+				mm_button_howtomod.setPosition(Vector2f(centx + 100 + offset, centy + 90));
+			}
+			break;
+		case Mods:
+			break;
+		case Progress:
+			break;
+	}
 }
 
 bool ends_with(string const& value, string const& ending)
@@ -228,14 +260,24 @@ bool locateexe() {
 	return false;
 }
 
+bool hoveringSprite(Vector2i& mp, Sprite& spr, int width, int height) {
+	Vector2i coolstuffs = Vector2i(mp.x - spr.getPosition().x, mp.y - spr.getPosition().y);
+	return !(coolstuffs.x < 0 || coolstuffs.y < 0 || coolstuffs.x > width || coolstuffs.y > height);
+}
+
 long lastCpuTime = 0;
 void update(float secondsPassed) {
+	Vector2i mp = getMousePos();
 	switch (curState) {
 		case Setup:
 			break;
 		case Title:
 			break;
 		case Main:
+			mm_button_launch.setColor(hoveringSprite(mp, mm_button_launch, 192, 80) ? selected : white);
+			mm_button_mods.setColor(hoveringSprite(mp, mm_button_mods, 192, 80) ? selected : white);
+			mm_button_reinstall.setColor(hoveringSprite(mp, mm_button_reinstall, 192, 50) ? selected : white);
+			mm_button_howtomod.setColor(hoveringSprite(mp, mm_button_howtomod, 192, 50) ? selected : white);
 			break;
 		case Mods:
 			break;
@@ -348,6 +390,22 @@ void scenesetup_mainmenu() {
 	mm_button_mods.setPosition(Vector2f(200, 0));
 	mm_button_reinstall.setPosition(Vector2f(0, 90));
 	mm_button_howtomod.setPosition(Vector2f(200, 90));
+
+	reposscene();
+}
+
+void switchstate(StateType newstate) {
+	cout << "New state " << newstate << " found.\n";
+	StateType oldState = curState;
+	curState = newstate;
+
+	switch (newstate) {
+	case Main:
+		scenesetup_mainmenu();
+		break;
+	}
+
+	reposscene();
 }
 
 void render() {
@@ -359,7 +417,8 @@ void render() {
 		case Title:
 			break;
 		case Main:
-			scenesetup_mainmenu();
+			if (!mm_setup)
+				return;
 
 			window.draw(mm_logo);
 
@@ -479,6 +538,14 @@ int main() {
 					break;
 				case Event::Resized:
 					cout << "Resize window!\n";
+					bool aspect_height = e.size.width > e.size.height;
+					double aspect = aspect_height ? ((double)e.size.width / e.size.height) : ((double)e.size.height / e.size.width);
+					cout << "Aspect ratio: " << aspect << " " << aspect_height << endl;
+					vz = FloatRect(0, 0, aspect_height ? (720 * aspect) : 1280, aspect_height ? 720 : (1280 * aspect));
+					window.setView(View(vz));
+					width = vz.width;
+					height = vz.height;
+					reposscene();
 					break;
 			}
 		}
