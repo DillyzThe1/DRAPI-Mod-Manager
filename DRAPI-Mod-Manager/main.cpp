@@ -15,6 +15,7 @@
 using namespace std;
 using namespace sf;
 using namespace std::filesystem;
+using json = nlohmann::json;
 
 VideoMode video(1280, 720);
 RenderWindow window(video, "DRAPI Mod Manager for Among Us");
@@ -32,6 +33,24 @@ Color bgcolor(15, 10, 25, 255);
 StateType curState = Title;
 
 string appdatapath, aupath, aumoddedpath;
+
+/*struct ModDependencyData {
+	string name;
+	int version;
+	string versionname;
+};
+
+struct ModData {
+	string name;
+	string file;
+	string banner;
+	string bannerhash;
+	int version;
+	string versionname;
+	string description;
+	string author;
+	list<ModDependencyData> dependencies;
+};*/
 
 // SETUP SCENE VARS
 // TITLE SCENE VARS
@@ -178,6 +197,7 @@ void loadappdatapath() {
 	aumoddedpath = appdatapath + "\\Game\\";
 }
 
+json launcherjson, announcementjson;
 bool downloaddata() {
 	string launcherdatapath = appdatapath + "\\launcher_latest.json";
 	string announcmentsdatapath = appdatapath + "\\announcement.json";
@@ -185,9 +205,34 @@ bool downloaddata() {
 	bool bConnect = InternetCheckConnection(L"https://www.google.com/", FLAG_ICC_FORCE_CONNECTION, 0);
 	if (!bConnect)
 		return false;
-	URLDownloadToFile(NULL, L"https://cdn.discordapp.com/attachments/849292573230104576/1060805985473667123/launcher_latest.json", wstring(launcherdatapath.begin(), launcherdatapath.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
+	URLDownloadToFile(NULL, L"https://cdn.discordapp.com/attachments/849292573230104576/1060836092003225681/launcher_latest.json", wstring(launcherdatapath.begin(), launcherdatapath.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
 	URLDownloadToFile(NULL, L"https://cdn.discordapp.com/attachments/849292573230104576/1060820994429812736/announcement.json", wstring(announcmentsdatapath.begin(), announcmentsdatapath.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
 	
+	ifstream launcherjson_stream(launcherdatapath);
+	launcherjson = json::parse(launcherjson_stream);
+	launcherjson_stream.close();
+
+	ifstream announcmentjson_stream(announcmentsdatapath);
+	announcementjson = json::parse(announcmentjson_stream);
+	announcmentjson_stream.close();
+
+	string bannerspath = appdatapath + "\\banners";
+	create_directory(bannerspath);
+
+	cout << "mods list has " << launcherjson["mods"].size() << " mods\n";
+
+	for (int i = 0; i < launcherjson["mods"].size(); i++) {
+		cout << "mod " << i << endl;
+		string funnyname = launcherjson["mods"][i]["name"];
+		string banner = launcherjson["mods"][i]["banner"];
+		string top10logic = bannerspath + "\\" + funnyname + ".png";
+		cout << "mdddod " << funnyname << " - " << banner << " - " << top10logic << endl;
+		if (starts_with(banner, "https://"))
+			URLDownloadToFile(NULL, wstring(banner.begin(), banner.end()).c_str(), wstring(top10logic.begin(), top10logic.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
+		else
+			cout << banner << " doesn't start with https://\n";
+	}
+
 	return true;
 }
 
