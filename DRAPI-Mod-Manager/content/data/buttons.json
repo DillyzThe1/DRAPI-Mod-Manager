@@ -1,0 +1,22 @@
+{
+	"spacex0": 20,
+	"spacex1": 20,
+	"spacex2": 45,
+	"spacey0": 10,
+	"spacey1": 10,
+	"spacey2": 15,
+	
+	"size0_bound_x": 192,
+	"size0_bound_y": 80,
+	"size1_bound_x": 192,
+	"size1_bound_y": 50,
+	"size2_bound_x": 67,
+	"size2_bound_y": 67,
+	
+	"launch_size": 0,
+	"mods_size": 0,
+	"reinstall_size": 1,
+	"howtomod_size": 1,
+	
+	"minibuttons": ["announcements", "settings", "innersloth", "refresh", "discord"]
+}
