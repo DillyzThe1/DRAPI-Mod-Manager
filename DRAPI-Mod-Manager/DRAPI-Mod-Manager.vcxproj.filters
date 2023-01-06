@@ -21,6 +21,9 @@
     <ClCompile Include="tinyfiledialogs.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="miniz.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="dlls\x64\openal32.dll">
@@ -62,6 +65,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="miniz.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -10,3 +10,4 @@ Debug/*
 RECOVER_*.fla
 DRAPI-Mod-Manager/tinyfiledialogs.*
 DRAPI-Mod-Manager/json.hpp
+DRAPI-Mod-Manager/miniz.*

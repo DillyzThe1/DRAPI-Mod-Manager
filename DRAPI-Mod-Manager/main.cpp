@@ -144,12 +144,13 @@ bool locateexe() {
 		int funnybytes[256]{0};
 		for (int i = 0; i < 256; i++)
 			funnybytes[i] = 0;
-		ifstream biezipstream(launcherdatapath, ios::in | ios::out | ios::binary);
+		ifstream biezipstream(bepinexzippath, ios::in | ios::out | ios::binary);
 		//string biezip = biezipstream.read();
 		int inlen{0};
 		char indata;
 		cout << "-- data --" << endl;
 		string out = "";
+		biezipstream.
 		while (!biezipstream.eof())
 		{
 			indata = biezipstream.get();
@@ -157,7 +158,7 @@ bool locateexe() {
 			out += indata;
 			inlen++;
 		}
-		cout << out << endl << "-- end --" << endl;
+		cout << "-- end --" << endl;
 		biezipstream.close(); 
 		return true;
 	}
@@ -248,7 +249,7 @@ bool downloaddata() {
 
 	// download bepinex
 	string bepinexlink = launcherjson["bepinex"];
-	download(bepinexlink, bepinexzippath);
+	//download(bepinexlink, bepinexzippath);
 
 	// download all banners
 	string bannerspath = appdatapath + "\\banners";

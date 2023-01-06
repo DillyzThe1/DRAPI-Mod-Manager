@@ -154,6 +154,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="miniz.c" />
     <ClCompile Include="tinyfiledialogs.c" />
   </ItemGroup>
   <ItemGroup>
@@ -237,6 +238,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="miniz.h" />
     <ClInclude Include="tinyfiledialogs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
