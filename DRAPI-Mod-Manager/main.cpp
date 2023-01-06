@@ -11,6 +11,7 @@
 #include <wininet.h>
 #pragma comment(lib,"Wininet.lib")
 #include "json.hpp"
+#include "miniz.h"
 
 using namespace std;
 using namespace sf;
@@ -138,6 +139,26 @@ bool locateexe() {
 		ofstream writeee(steamappid_path);
 		writeee << "945360";
 		writeee.close();
+		// extracting bepinex
+
+		int funnybytes[256]{0};
+		for (int i = 0; i < 256; i++)
+			funnybytes[i] = 0;
+		ifstream biezipstream(launcherdatapath, ios::in | ios::out | ios::binary);
+		//string biezip = biezipstream.read();
+		int inlen{0};
+		char indata;
+		cout << "-- data --" << endl;
+		string out = "";
+		while (!biezipstream.eof())
+		{
+			indata = biezipstream.get();
+			//cout << indata << endl;
+			out += indata;
+			inlen++;
+		}
+		cout << out << endl << "-- end --" << endl;
+		biezipstream.close(); 
 		return true;
 	}
 	return false;
