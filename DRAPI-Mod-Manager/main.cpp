@@ -82,6 +82,11 @@ struct ModData {
 // SETUP SCENE VARS
 // TITLE SCENE VARS
 // MAIN MENU SCENE VARS
+bool mm_setup = false;
+Texture mm_buttontex, mm_logotex;
+Sprite mm_logo;
+Sprite mm_button_launch, mm_button_mods, mm_button_reinstall, mm_button_howtomod;
+// --Sprite mm_minibutton_announcements, mm_minibutton_settings, mm_minibutton_innersloth, mm_minibutton_refresh, mm_minibutton_discord;
 // MODS MENU SCENE VARS
 // PROGRESS SCENE SCENE VARS
 // :sadsping:
@@ -239,25 +244,6 @@ void update(float secondsPassed) {
 	}
 }
 
-void render() {
-	window.clear(bgcolor);
-
-	switch (curState) {
-		case Setup:
-			break;
-		case Title:
-			break;
-		case Main:
-			break;
-		case Mods:
-			break;
-		case Progress:
-			break;
-	}
-
-	window.display();
-}
-
 
 void loadappdatapath() {
 	DWORD buffersize = 65535; // max size
@@ -323,6 +309,74 @@ bool downloaddata() {
 	return true;
 }
 
+json buttondata;
+void scenesetup_mainmenu() {
+	if (mm_setup)
+		return;
+	mm_setup = true;
+
+	ifstream buttondata_stream("content/data/buttons.json");
+	buttondata = json::parse(buttondata_stream);
+	buttondata_stream.close();
+
+	int s0bx = buttondata["size0_bound_x"], s0by = buttondata["size0_bound_y"];
+	int s1bx = buttondata["size1_bound_x"], s1by = buttondata["size1_bound_y"];
+	int s2bx = buttondata["size2_bound_x"], s2by = buttondata["size2_bound_y"];
+
+	mm_logotex.loadFromFile("content/graphics/logo.png");
+	mm_buttontex.loadFromFile("content/graphics/buttons.png");
+
+	mm_logo.setTexture(mm_logotex);
+
+	mm_button_launch.setTexture(mm_buttontex);
+	mm_button_launch.setTextureRect(IntRect(200, 0, s0bx, s0by));
+
+	mm_button_mods.setTexture(mm_buttontex);
+	mm_button_mods.setTextureRect(IntRect(400, 0, s0bx, s0by));
+
+	mm_button_reinstall.setTexture(mm_buttontex);
+	mm_button_reinstall.setTextureRect(IntRect(200, 88, s1bx, s1by));
+
+	mm_button_howtomod.setTexture(mm_buttontex);
+	mm_button_howtomod.setTextureRect(IntRect(400, 88, s1bx, s1by));
+
+
+
+	mm_logo.setPosition(Vector2f(400, 0));
+
+	mm_button_launch.setPosition(Vector2f(0, 0));
+	mm_button_mods.setPosition(Vector2f(200, 0));
+	mm_button_reinstall.setPosition(Vector2f(0, 90));
+	mm_button_howtomod.setPosition(Vector2f(200, 90));
+}
+
+void render() {
+	window.clear(bgcolor);
+
+	switch (curState) {
+		case Setup:
+			break;
+		case Title:
+			break;
+		case Main:
+			scenesetup_mainmenu();
+
+			window.draw(mm_logo);
+
+			window.draw(mm_button_launch);
+			window.draw(mm_button_mods);
+			window.draw(mm_button_reinstall);
+			window.draw(mm_button_howtomod);
+			break;
+		case Mods:
+			break;
+		case Progress:
+			break;
+	}
+
+	window.display();
+}
+
 // this function will check if you're downloading/copying/installing anything and then close the window if not
 void close() {
 	window.close();
@@ -363,6 +417,9 @@ int main() {
 					switch (curState) {
 						case Setup:
 							switch (e.key.code) {
+								case Keyboard::Escape:
+									switchstate(Title);
+									break;
 								case Keyboard::E: {
 										try {
 											bool exefound = locateexe();
@@ -389,11 +446,27 @@ int main() {
 								case Keyboard::S:
 									switchstate(Setup);
 									break;
+								case Keyboard::M:
+									switchstate(Main);
+									break;
 							}
 							break;
 						case Main:
+							switch (e.key.code) {
+								case Keyboard::Escape:
+									switchstate(Title);
+									break;
+								case Keyboard::M:
+									switchstate(Mods);
+									break;
+							}
 							break;
 						case Mods:
+							switch (e.key.code) {
+								case Keyboard::Escape:
+									switchstate(Main);
+									break;
+							}
 							break;
 						case Progress:
 							break;
