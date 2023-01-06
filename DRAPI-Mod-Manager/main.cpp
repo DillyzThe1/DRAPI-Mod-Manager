@@ -56,7 +56,6 @@ json userdata = {
 };
 
 void saveuserdata() {
-	cout << "writing the goofy: " << userdata.dump(4) << endl;
 	ofstream writeee(userdatapath.string());
 	writeee << userdata.dump(4);
 	writeee.close();
