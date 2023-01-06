@@ -153,7 +153,7 @@ int main() {
 							switch (e.key.code) {
 								case Keyboard::E: {
 										bool exefound = locateexe();
-										cout << "Exe properly found? " << exefound << ".\n";
+										cout << "Exe " << (exefound == 1 ? "properly" : "improperly") << " found.\n";
 									}
 									break;
 							}
