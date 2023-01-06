@@ -64,6 +64,8 @@ struct ModData {
 // PROGRESS SCENE SCENE VARS
 // :sadsping:
 
+
+
 string fixwstr(wstring& ogstr) {
 	string newstr(ogstr.begin(), ogstr.end());
 	return newstr;
@@ -123,6 +125,13 @@ bool clonedir(string& from, string& to) {
 	return true;
 }
 
+bool download(string& link, string& file) {
+	if (!starts_with(link, "https:")) // prevents crashes and insecure links
+		return false;
+	URLDownloadToFile(NULL, wstring(link.begin(), link.end()).c_str(), wstring(file.begin(), file.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
+	return true;
+}
+
 const string exename = "Among Us.exe";
 char const* AmongUsExeFilter[1] = { exename.c_str() };
 bool locateexe() {
@@ -139,6 +148,11 @@ bool locateexe() {
 		ofstream writeee(steamappid_path);
 		writeee << "945360";
 		writeee.close();
+		
+		// download bepinex
+		string bepinexlink = launcherjson["bepinex"];
+		download(bepinexlink, bepinexzippath);
+
 		// extracting bepinex
 		mz_zip_archive ziparchive{};
 		path dp{bepinexzippath};
@@ -174,6 +188,9 @@ bool locateexe() {
 			return false; // epic zip fail
 		// for mods
 		create_directories(aumoddedpath + "\\BepInEx\\plugins");
+
+		// now let's trash bepinex.zip
+		remove(bepinexzippath);
 		return true;
 	}
 	return false;
@@ -240,10 +257,6 @@ void loadappdatapath() {
 	bepinexzippath = appdatapath + "\\bepinex.zip";
 }
 
-void download(string& link, string& file) {
-	URLDownloadToFile(NULL, wstring(link.begin(), link.end()).c_str(), wstring(file.begin(), file.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
-}
-
 
 bool downloaddata() {
 	//cout << "We should download \"" << launcherdatalink << "\" to file \"" << ldp_wstr << "\".\n";
@@ -260,10 +273,6 @@ bool downloaddata() {
 	ifstream announcmentjson_stream(announcmentsdatapath);
 	announcementjson = json::parse(announcmentjson_stream);
 	announcmentjson_stream.close();
-
-	// download bepinex
-	string bepinexlink = launcherjson["bepinex"];
-	//download(bepinexlink, bepinexzippath);
 
 	// download all banners
 	string bannerspath = appdatapath + "\\banners";
