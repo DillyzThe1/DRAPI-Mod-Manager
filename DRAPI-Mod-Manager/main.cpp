@@ -6,6 +6,8 @@
 #include <processenv.h>
 #include <filesystem>
 #include <fstream>
+#include <urlmon.h>
+#pragma comment(lib, "urlmon.lib")
 
 using namespace std;
 using namespace sf;
@@ -49,6 +51,12 @@ bool ends_with(string const& value, string const& ending)
 {
 	if (ending.size() > value.size()) return false;
 	return equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
+
+bool starts_with(string const& value, string const& start)
+{
+	if (start.size() > value.size()) return false;
+	return value.substr(0, start.size()) == start;
 }
 
 bool replace(string& str, const string& from, const string& to) {
@@ -156,12 +164,22 @@ void loadappdatapath() {
 	buffer.resize(buffersize);
 	//string finalval = buffer.c_str();
 	appdatapath = fixwstr(buffer);
-	replace(appdatapath, "Roaming", "LocalLow\\DillyzThe1\\DRAPIMM");
+	string appfolder = "DRAPIMM";
+	replace(appdatapath, "Roaming", "LocalLow\\DillyzThe1\\" + appfolder);
+	create_directory(appdatapath.substr(0, appdatapath.length() - appfolder.length()));
 	create_directory(appdatapath);
 
 	cout << "Appdata: " << appdatapath << "\n";
 
 	aumoddedpath = appdatapath + "\\Game\\";
+}
+
+void downloaddata() {
+	string launcherdatapath = appdatapath + "\\launcher_latest.json";
+	string announcmentsdatapath = appdatapath + "\\announcement.json";
+	//cout << "We should download \"" << launcherdatalink << "\" to file \"" << ldp_wstr << "\".\n";
+	URLDownloadToFile(NULL, L"https://cdn.discordapp.com/attachments/849292573230104576/1060805985473667123/launcher_latest.json", wstring(launcherdatapath.begin(), launcherdatapath.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
+	URLDownloadToFile(NULL, L"https://cdn.discordapp.com/attachments/849292573230104576/1060820994429812736/announcement.json", wstring(announcmentsdatapath.begin(), announcmentsdatapath.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
 }
 
 // this function will check if you're downloading/copying/installing anything and then close the window if not
@@ -177,6 +195,7 @@ int main() {
 	window.requestFocus();
 
 	loadappdatapath();
+	downloaddata();
 
 	while (window.isOpen()) {
 		long curTime = clock();
@@ -197,6 +216,9 @@ int main() {
 										bool exefound = locateexe();
 										cout << "Exe " << (exefound == 1 ? "properly" : "improperly") << " found.\n";
 									}
+									break;
+								case Keyboard::A:
+									downloaddata();
 									break;
 							}
 							break;
