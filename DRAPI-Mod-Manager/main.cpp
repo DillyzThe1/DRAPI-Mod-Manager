@@ -8,6 +8,9 @@
 #include <fstream>
 #include <urlmon.h>
 #pragma comment(lib, "urlmon.lib")
+#include <wininet.h>
+#pragma comment(lib,"Wininet.lib")
+#include "json.hpp"
 
 using namespace std;
 using namespace sf;
@@ -15,6 +18,7 @@ using namespace std::filesystem;
 
 VideoMode video(1280, 720);
 RenderWindow window(video, "DRAPI Mod Manager for Among Us");
+LPCWSTR titlebutgoofy = L"DRAPI Mod Manager for Among Us";
 
 enum StateType {
 	Setup,    // when you're setting up your new among us directory 
@@ -174,12 +178,17 @@ void loadappdatapath() {
 	aumoddedpath = appdatapath + "\\Game\\";
 }
 
-void downloaddata() {
+bool downloaddata() {
 	string launcherdatapath = appdatapath + "\\launcher_latest.json";
 	string announcmentsdatapath = appdatapath + "\\announcement.json";
 	//cout << "We should download \"" << launcherdatalink << "\" to file \"" << ldp_wstr << "\".\n";
+	bool bConnect = InternetCheckConnection(L"https://www.google.com/", FLAG_ICC_FORCE_CONNECTION, 0);
+	if (!bConnect)
+		return false;
 	URLDownloadToFile(NULL, L"https://cdn.discordapp.com/attachments/849292573230104576/1060805985473667123/launcher_latest.json", wstring(launcherdatapath.begin(), launcherdatapath.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
 	URLDownloadToFile(NULL, L"https://cdn.discordapp.com/attachments/849292573230104576/1060820994429812736/announcement.json", wstring(announcmentsdatapath.begin(), announcmentsdatapath.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
+	
+	return true;
 }
 
 // this function will check if you're downloading/copying/installing anything and then close the window if not
@@ -195,7 +204,13 @@ int main() {
 	window.requestFocus();
 
 	loadappdatapath();
-	downloaddata();
+	if (!downloaddata()) {
+		window.close();
+		MessageBox(NULL, L"Internet access not found!", titlebutgoofy, MB_ICONERROR);
+		return 0;
+	}
+
+	MessageBox(NULL, L"This program is unfinished, but hello anyway!\nBinds:\n- S to switch to Setup.\n- E to locate EXE.\n- A to download files.\n- O to open your LocalLow folder.\n\nYou only need to hit S once & other binds require an S press.\nOk bye!", titlebutgoofy, MB_ICONINFORMATION);
 
 	while (window.isOpen()) {
 		long curTime = clock();
@@ -219,6 +234,9 @@ int main() {
 									break;
 								case Keyboard::A:
 									downloaddata();
+									break;
+								case Keyboard::O:
+									ShellExecuteA(NULL, "open", appdatapath.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 									break;
 							}
 							break;

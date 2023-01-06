@@ -4,6 +4,7 @@ An all in one launcher for all of my Among Us mods, including those of general u
 ## Libraries Used
 - SFML [[sfml-dev.org]](https://www.sfml-dev.org/)<br>
 - tinyfiledialogs [[sourceforge.net]](https://sourceforge.net/projects/tinyfiledialogs/)
+- json [[github.com]](https://github.com/nlohmann/json)
 
 ## Disclaimer
 This launcher is not affiliated with Among Us or Innersloth LLC, and the content contained therein is not endorsed or otherwise sponsored by Innersloth LLC.<br>
