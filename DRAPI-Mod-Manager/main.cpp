@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <time.h>
+#include "tinyfiledialogs.h"
 
 using namespace std;
 using namespace sf;
@@ -25,6 +26,18 @@ StateType curState = Title;
 // MODS MENU SCENE VARS
 // PROGRESS SCENE SCENE VARS
 // :sadsping:
+
+void switchstate(StateType newstate) {
+	cout << "New state " << newstate << " found.\n";
+	StateType oldState = curState;
+	curState = newstate;
+}
+
+char const* AmongUsExeFilter[1] = { "Among Us.exe" };
+void locateexe() {
+	string funny = tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
+	cout << funny << "\n";
+}
 
 long lastCpuTime = 0;
 void update(float secondsPassed) {
@@ -85,8 +98,31 @@ int main() {
 					close();
 					break;
 				case Event::KeyPressed:
-					switch (e.key.code) {
-						case Keyboard::Escape:
+					switch (curState) {
+						case Setup:
+							switch (e.key.code) {
+								case Keyboard::E:
+									locateexe();
+									break;
+							}
+							break;
+						case Title:
+							switch (e.key.code) {
+								case Keyboard::Escape:
+									close();
+									break;
+								case Keyboard::S:
+									switchstate(Setup);
+									break;
+							}
+							break;
+						case Main:
+							break;
+						case Mods:
+							break;
+						case Progress:
+							break;
+						default:
 							close();
 							break;
 					}
