@@ -58,12 +58,46 @@ bool replace(string& str, const string& from, const string& to) {
 	return true;
 }
 
-char const* AmongUsExeFilter[1] = { "Among Us.exe" };
+bool clonedir(string& from, string& to) {
+	//cout << "Copying data at " << from << " into " << to << ".\n";
+
+	try {
+		if (is_directory(from))
+		{
+			remove_all(to);
+			create_directory(to);
+
+			for (const auto& entry : directory_iterator(from)) {
+				string name = entry.path().filename().u8string();
+				string from_ext = from + "\\" + name, to_ext = to + "\\" + name;
+				//cout << entry.path().filename().u8string() << endl;
+				if (!clonedir(from_ext, to_ext))
+					return false;
+			}
+
+			return true;
+		}
+		copy(from, to);
+	}
+	catch (exception e) {
+		cout << "Couldn't copy data at \"" << from << "\" to location \"" << to << "\"! Reason: " << e.what() << ".\n";
+		return false;
+	}
+	return true;
+}
+
+const string exename = "Among Us.exe";
+char const* AmongUsExeFilter[1] = { exename.c_str() };
 bool locateexe() {
 	string funny = tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
 	cout << "File Opened: " << funny << "\n";
-	if (ends_with(funny, "Among Us.exe")) {
-		aupath = funny;
+	if (ends_with(funny, exename)) {
+		aupath = funny.substr(0, funny.length() - exename.length());
+		cout << "Folder: " << aupath << "\n";
+		remove_all(aumoddedpath);
+		create_directory(aumoddedpath);
+		clonedir(aupath, aumoddedpath);
+		//copy(aupath, aumoddedpath);
 		return true;
 	}
 	return false;
@@ -123,7 +157,6 @@ void loadappdatapath() {
 	cout << "Appdata: " << appdatapath << "\n";
 
 	aumoddedpath = appdatapath + "\\Game\\";
-	create_directory(aumoddedpath);
 }
 
 // this function will check if you're downloading/copying/installing anything and then close the window if not
