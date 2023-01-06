@@ -62,7 +62,7 @@ void saveuserdata() {
 	writeee.close();
 }
 
-FloatRect vz;
+FloatRect vz(0, 0, 1280, 720);
 Vector2i getMousePos() {
 	//if (!window.hasFocus())
 	//	return Vector2i(-100, -100);
