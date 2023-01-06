@@ -5,6 +5,7 @@
 #include <windows.h>
 #include <processenv.h>
 #include <filesystem>
+#include <fstream>
 
 using namespace std;
 using namespace sf;
@@ -97,7 +98,11 @@ bool locateexe() {
 		remove_all(aumoddedpath);
 		create_directory(aumoddedpath);
 		clonedir(aupath, aumoddedpath);
-		//copy(aupath, aumoddedpath);
+		// writing the steam app id for the funnies
+		string steamappid_path = aumoddedpath + "\\steam_appid.txt";
+		ofstream writeee(steamappid_path);
+		writeee << "945360";
+		writeee.close();
 		return true;
 	}
 	return false;
