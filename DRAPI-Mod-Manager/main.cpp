@@ -39,6 +39,29 @@ string announcmentdataURL = "https://cdn.discordapp.com/attachments/849292573230
 string appdatapath, aupath, aumoddedpath, launcherdatapath, announcmentsdatapath, bepinexzippath;
 json launcherjson, announcementjson;
 
+path userdatapath;
+
+const int launcherversion = 0;
+json userdata = {
+	{"last_announcement", -1},
+	{"last_bepinex", -1},
+	{"last_auversion", "1970.1.1"},
+	{"mods_installed", {
+		{
+			{"name", "DillyzRoleApi"},
+			{"last_version", -1},
+			{"last_versionname", "v0.0.0-dev"}
+		}
+	}}
+};
+
+void saveuserdata() {
+	cout << "writing the goofy: " << userdata.dump(4) << endl;
+	ofstream writeee(userdatapath.string());
+	writeee << userdata.dump(4);
+	writeee.close();
+}
+
 /*struct ModDependencyData {
 	string name;
 	int version;
@@ -191,6 +214,11 @@ bool locateexe() {
 
 		// now let's trash bepinex.zip
 		remove(bepinexzippath);
+
+		// modify user data
+		userdata["last_bepinex"] = launcherjson["bepinex_vers"];
+		userdata["last_auversion"] = launcherjson["auvers"];
+		saveuserdata();
 		return true;
 	}
 	return false;
@@ -255,6 +283,7 @@ void loadappdatapath() {
 	launcherdatapath = appdatapath + "\\launcher_latest.json";
 	announcmentsdatapath = appdatapath + "\\announcement.json";
 	bepinexzippath = appdatapath + "\\bepinex.zip";
+	userdatapath = path::path(appdatapath + "\\userdata.json");
 }
 
 
@@ -281,15 +310,15 @@ bool downloaddata() {
 	cout << "mods list has " << launcherjson["mods"].size() << " mods\n";
 
 	for (int i = 0; i < launcherjson["mods"].size(); i++) {
-		cout << "mod " << i << endl;
+		//cout << "mod " << i << endl;
 		string funnyname = launcherjson["mods"][i]["name"];
 		string banner = launcherjson["mods"][i]["banner"];
 		string top10logic = bannerspath + "\\" + funnyname + ".png";
-		cout << "mdddod " << funnyname << " - " << banner << " - " << top10logic << endl;
+		//cout << "mdddod " << funnyname << " - " << banner << " - " << top10logic << endl;
 		if (starts_with(banner, "https://"))
 			download(banner, top10logic);
-		else
-			cout << banner << " doesn't start with https://\n";
+		//else
+		//	cout << banner << " doesn't start with https://\n";
 	}
 
 	return true;
@@ -313,6 +342,10 @@ int main() {
 		MessageBox(NULL, L"Internet access not found!", titlebutgoofy, MB_ICONERROR);
 		return 0;
 	}
+
+	// make defaults just incase
+	//if (!exists(userdatapath))
+		saveuserdata();
 
 	MessageBox(NULL, L"This program is unfinished, but hello anyway!\nBinds:\n- S to switch to Setup.\n- E to locate EXE.\n- A to download files.\n- O to open your LocalLow folder.\n\nYou only need to hit S once & other binds require an S press.\nOk bye!", titlebutgoofy, MB_ICONINFORMATION);
 
