@@ -140,26 +140,40 @@ bool locateexe() {
 		writeee << "945360";
 		writeee.close();
 		// extracting bepinex
-
-		int funnybytes[256]{0};
-		for (int i = 0; i < 256; i++)
-			funnybytes[i] = 0;
-		ifstream biezipstream(bepinexzippath, ios::in | ios::out | ios::binary);
-		//string biezip = biezipstream.read();
-		int inlen{0};
-		char indata;
-		cout << "-- data --" << endl;
-		string out = "";
-		biezipstream.
-		while (!biezipstream.eof())
-		{
-			indata = biezipstream.get();
-			//cout << indata << endl;
-			out += indata;
-			inlen++;
+		mz_zip_archive ziparchive{};
+		path dp{bepinexzippath};
+		if (!mz_zip_reader_init_file(&ziparchive, dp.string().c_str(), 0))
+			return false; // failed to initiate the zip
+		const int fileamt = (int)mz_zip_reader_get_num_files(&ziparchive);
+		cout << "files found (" << fileamt << ")\n";
+		if (fileamt == 0)
+			return false; // failed to find any contents
+		mz_zip_archive_file_stat fs;
+		if (!mz_zip_reader_file_stat(&ziparchive, 0, &fs)) {
+			mz_zip_reader_end(&ziparchive);
+			return false;
 		}
-		cout << "-- end --" << endl;
-		biezipstream.close(); 
+		cout << "in the " << aumoddedpath << endl;
+		for (int i = 0; i < fileamt; i++) {
+			mz_zip_reader_file_stat(&ziparchive, i, &fs);
+			string newpath = aumoddedpath + fs.m_filename;
+			path dir(newpath);
+			//cout << "check the " << newpath << " " << dir.parent_path().string() << endl;
+			string funnydir = dir.parent_path().string();
+			string top10awesome = funnydir.substr(aumoddedpath.length() - 1, funnydir.length());
+			if (top10awesome.length() != 0)
+				create_directories(dir.parent_path());
+			path fileout(dir.parent_path().generic_string() + "\\" + dir.filename().string());
+			if (!mz_zip_reader_extract_to_file(&ziparchive, i, fileout.string().c_str(), 0))
+			{
+				mz_zip_reader_end(&ziparchive);
+				return false; // epic file ending
+			}
+		}
+		if (!mz_zip_reader_end(&ziparchive))
+			return false; // epic zip fail
+		// for mods
+		create_directories(aumoddedpath + "\\BepInEx\\plugins");
 		return true;
 	}
 	return false;
@@ -309,8 +323,13 @@ int main() {
 						case Setup:
 							switch (e.key.code) {
 								case Keyboard::E: {
-										bool exefound = locateexe();
-										cout << "Exe " << (exefound == 1 ? "properly" : "improperly") << " found.\n";
+										try {
+											bool exefound = locateexe();
+											cout << "Exe " << (exefound == 1 ? "properly" : "improperly") << " found.\n";
+										}
+										catch (exception e) {
+											cout << "Could not properly setup Among Us directory! Reason: " << e.what() << ".\n";
+										}
 									}
 									break;
 								case Keyboard::A:
