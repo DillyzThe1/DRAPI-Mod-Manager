@@ -24,7 +24,7 @@ enum StateType {
 Color bgcolor(15, 10, 25, 255);
 StateType curState = Title;
 
-string appdatapath;
+string appdatapath, aupath, aumoddedpath;
 
 // SETUP SCENE VARS
 // TITLE SCENE VARS
@@ -62,8 +62,10 @@ char const* AmongUsExeFilter[1] = { "Among Us.exe" };
 bool locateexe() {
 	string funny = tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
 	cout << "File Opened: " << funny << "\n";
-	if (ends_with(funny, "Among Us.exe"))
+	if (ends_with(funny, "Among Us.exe")) {
+		aupath = funny;
 		return true;
+	}
 	return false;
 }
 
@@ -117,9 +119,11 @@ void loadappdatapath() {
 	appdatapath = fixwstr(buffer);
 	replace(appdatapath, "Roaming", "LocalLow\\DillyzThe1\\DRAPIMM");
 	create_directory(appdatapath);
+
 	cout << "Appdata: " << appdatapath << "\n";
 
-
+	aumoddedpath = appdatapath + "\\Game\\";
+	create_directory(aumoddedpath);
 }
 
 // this function will check if you're downloading/copying/installing anything and then close the window if not
