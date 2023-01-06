@@ -8,3 +8,4 @@ DRAPI-Mod-Manager/dlls/**/**.dll
 enc_temp_folder/*
 Debug/*
 RECOVER_*.fla
+\DRAPI-Mod-Manager\tinyfiledialogs.c
