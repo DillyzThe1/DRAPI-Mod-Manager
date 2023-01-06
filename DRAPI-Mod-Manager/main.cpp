@@ -2,9 +2,13 @@
 #include <SFML/Graphics.hpp>
 #include <time.h>
 #include "tinyfiledialogs.h"
+#include <windows.h>
+#include <processenv.h>
+#include <filesystem>
 
 using namespace std;
 using namespace sf;
+using namespace std::filesystem;
 
 VideoMode video(1280, 720);
 RenderWindow window(video, "DRAPI Mod Manager for Among Us");
@@ -20,6 +24,8 @@ enum StateType {
 Color bgcolor(15, 10, 25, 255);
 StateType curState = Title;
 
+string appdatapath;
+
 // SETUP SCENE VARS
 // TITLE SCENE VARS
 // MAIN MENU SCENE VARS
@@ -27,16 +33,38 @@ StateType curState = Title;
 // PROGRESS SCENE SCENE VARS
 // :sadsping:
 
+string fixwstr(wstring& ogstr) {
+	string newstr(ogstr.begin(), ogstr.end());
+	return newstr;
+}
+
 void switchstate(StateType newstate) {
 	cout << "New state " << newstate << " found.\n";
 	StateType oldState = curState;
 	curState = newstate;
 }
 
+bool ends_with(string const& value, string const& ending)
+{
+	if (ending.size() > value.size()) return false;
+	return equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
+
+bool replace(string& str, const string& from, const string& to) {
+	size_t start_pos = str.find(from);
+	if (start_pos == string::npos)
+		return false;
+	str.replace(start_pos, from.length(), to);
+	return true;
+}
+
 char const* AmongUsExeFilter[1] = { "Among Us.exe" };
-void locateexe() {
+bool locateexe() {
 	string funny = tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
-	cout << funny << "\n";
+	cout << "File Opened: " << funny << "\n";
+	if (ends_with(funny, "Among Us.exe"))
+		return true;
+	return false;
 }
 
 long lastCpuTime = 0;
@@ -74,6 +102,26 @@ void render() {
 	window.display();
 }
 
+
+void loadappdatapath() {
+	DWORD buffersize = 65535; // max size
+	wstring buffer;
+	buffer.resize(buffersize);
+	buffersize = GetEnvironmentVariable(L"APPDATA", &buffer[0], buffersize);
+	if (!buffersize) {
+		cout << "Appdata not found.\n";
+		return;
+	}
+	buffer.resize(buffersize);
+	//string finalval = buffer.c_str();
+	appdatapath = fixwstr(buffer);
+	replace(appdatapath, "Roaming", "LocalLow\\DillyzThe1\\DRAPIMM");
+	create_directory(appdatapath);
+	cout << "Appdata: " << appdatapath << "\n";
+
+
+}
+
 // this function will check if you're downloading/copying/installing anything and then close the window if not
 void close() {
 	window.close();
@@ -85,6 +133,8 @@ int main() {
 	window.setFramerateLimit(120);
 	window.setVerticalSyncEnabled(true);
 	window.requestFocus();
+
+	loadappdatapath();
 
 	while (window.isOpen()) {
 		long curTime = clock();
@@ -101,8 +151,10 @@ int main() {
 					switch (curState) {
 						case Setup:
 							switch (e.key.code) {
-								case Keyboard::E:
-									locateexe();
+								case Keyboard::E: {
+										bool exefound = locateexe();
+										cout << "Exe properly found? " << exefound << ".\n";
+									}
 									break;
 							}
 							break;
