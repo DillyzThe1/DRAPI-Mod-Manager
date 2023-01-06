@@ -32,7 +32,11 @@ enum StateType {
 Color bgcolor(15, 10, 25, 255);
 StateType curState = Title;
 
-string appdatapath, aupath, aumoddedpath;
+string launcherdataURL = "https://cdn.discordapp.com/attachments/849292573230104576/1060836092003225681/launcher_latest.json";
+string announcmentdataURL = "https://cdn.discordapp.com/attachments/849292573230104576/1060820994429812736/announcement.json";
+
+string appdatapath, aupath, aumoddedpath, launcherdatapath, announcmentsdatapath, bepinexzippath;
+json launcherjson, announcementjson;
 
 /*struct ModDependencyData {
 	string name;
@@ -195,18 +199,23 @@ void loadappdatapath() {
 	cout << "Appdata: " << appdatapath << "\n";
 
 	aumoddedpath = appdatapath + "\\Game\\";
+	launcherdatapath = appdatapath + "\\launcher_latest.json";
+	announcmentsdatapath = appdatapath + "\\announcement.json";
+	bepinexzippath = appdatapath + "\\bepinex.zip";
 }
 
-json launcherjson, announcementjson;
+void download(string& link, string& file) {
+	URLDownloadToFile(NULL, wstring(link.begin(), link.end()).c_str(), wstring(file.begin(), file.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
+}
+
+
 bool downloaddata() {
-	string launcherdatapath = appdatapath + "\\launcher_latest.json";
-	string announcmentsdatapath = appdatapath + "\\announcement.json";
 	//cout << "We should download \"" << launcherdatalink << "\" to file \"" << ldp_wstr << "\".\n";
 	bool bConnect = InternetCheckConnection(L"https://www.google.com/", FLAG_ICC_FORCE_CONNECTION, 0);
 	if (!bConnect)
 		return false;
-	URLDownloadToFile(NULL, L"https://cdn.discordapp.com/attachments/849292573230104576/1060836092003225681/launcher_latest.json", wstring(launcherdatapath.begin(), launcherdatapath.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
-	URLDownloadToFile(NULL, L"https://cdn.discordapp.com/attachments/849292573230104576/1060820994429812736/announcement.json", wstring(announcmentsdatapath.begin(), announcmentsdatapath.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
+	download(launcherdataURL, launcherdatapath);
+	download(announcmentdataURL, announcmentsdatapath);
 	
 	ifstream launcherjson_stream(launcherdatapath);
 	launcherjson = json::parse(launcherjson_stream);
@@ -216,6 +225,11 @@ bool downloaddata() {
 	announcementjson = json::parse(announcmentjson_stream);
 	announcmentjson_stream.close();
 
+	// download bepinex
+	string bepinexlink = launcherjson["bepinex"];
+	download(bepinexlink, bepinexzippath);
+
+	// download all banners
 	string bannerspath = appdatapath + "\\banners";
 	create_directory(bannerspath);
 
@@ -228,7 +242,7 @@ bool downloaddata() {
 		string top10logic = bannerspath + "\\" + funnyname + ".png";
 		cout << "mdddod " << funnyname << " - " << banner << " - " << top10logic << endl;
 		if (starts_with(banner, "https://"))
-			URLDownloadToFile(NULL, wstring(banner.begin(), banner.end()).c_str(), wstring(top10logic.begin(), top10logic.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
+			download(banner, top10logic);
 		else
 			cout << banner << " doesn't start with https://\n";
 	}
