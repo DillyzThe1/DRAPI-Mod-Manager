@@ -23,6 +23,7 @@ RenderWindow window(video, "DRAPI Mod Manager for Among Us", Style::Default, Con
 LPCWSTR titlebutgoofy = L"DRAPI Mod Manager for Among Us";
 
 enum StateType {
+	None,     // default so i can call things
 	Setup,    // when you're setting up your new among us directory 
 	Title,    // the title screen, showing everything cool
 	Main,     // the main menu, showing the buttons and options, alongside credits and information
@@ -31,7 +32,7 @@ enum StateType {
 };
 
 Color bgcolor(15, 10, 25, 255), white(255, 255, 255, 255), selected(0, 255, 0, 255);
-StateType curState = Title;
+StateType curState = None;
 
 string launcherdataURL = "https://cdn.discordapp.com/attachments/849292573230104576/1060836092003225681/launcher_latest.json";
 string announcmentdataURL = "https://cdn.discordapp.com/attachments/849292573230104576/1060820994429812736/announcement.json";
@@ -400,9 +401,9 @@ void switchstate(StateType newstate) {
 	curState = newstate;
 
 	switch (newstate) {
-	case Main:
-		scenesetup_mainmenu();
-		break;
+		case Main:
+			scenesetup_mainmenu();
+			break;
 	}
 
 	reposscene();
@@ -461,6 +462,7 @@ int main() {
 
 	MessageBox(NULL, L"This program is unfinished, but hello anyway!\nBinds:\n- S to switch to Setup.\n- E to locate EXE.\n- A to download files.\n- O to open your LocalLow folder.\n\nYou only need to hit S once & other binds require an S press.\nOk bye!", titlebutgoofy, MB_ICONINFORMATION);
 
+	switchstate(Title);
 	while (window.isOpen()) {
 		long curTime = clock();
 		update((float)(curTime - lastCpuTime) / (float)1000);
