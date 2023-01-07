@@ -1151,12 +1151,12 @@ int main() {
 	curmodbanner.setTexture(modbanners[0]);
 	curmodbanner.setTextureRect(IntRect(0, 0, 1280, 420));
 
-	MessageBox(NULL, L"This program is unfinished, but hello anyway!\nBinds:\n- S to switch to Setup.\n- E to locate EXE.\n- A to download files.\n- O to open your LocalLow folder.\n\nYou only need to hit S once & other binds require an S press.\nOk bye!", titlebutgoofy, MB_ICONINFORMATION);
+	switchstate(Main);
+	render();
 
 	if (userdata["last_announcement"] != announcementjson["version"])
 		showannouncement();
 
-	switchstate(Main);
 	while (window.isOpen()) {
 		long curTime = clock();
 		update((float)(curTime - lastCpuTime) / (float)1000);
