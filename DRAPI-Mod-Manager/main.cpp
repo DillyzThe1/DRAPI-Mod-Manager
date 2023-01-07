@@ -64,8 +64,8 @@ void saveuserdata() {
 
 FloatRect vz(0, 0, 1280, 720);
 Vector2i getMousePos() {
-	//if (!window.hasFocus())
-	//	return Vector2i(-100, -100);
+	if (!window.hasFocus())
+		return Vector2i(-100, -100);
 	Vector2i mp = Mouse::getPosition();
 	Vector2i wp = window.getPosition();
 	Vector2u ws = window.getSize();
@@ -263,30 +263,10 @@ bool locateexe() {
 
 bool hoveringSprite(Vector2i& mp, Sprite& spr, int width, int height) {
 	Vector2i coolstuffs = Vector2i(mp.x - spr.getPosition().x, mp.y - spr.getPosition().y);
-	return !(coolstuffs.x < 0 || coolstuffs.y < 0 || coolstuffs.x > width || coolstuffs.y > height);
+	bool hovering = !(coolstuffs.x < 0 || coolstuffs.y < 0 || coolstuffs.x > width || coolstuffs.y > height);
+	spr.setColor(hovering ? selected : white);
+	return hovering;
 }
-
-long lastCpuTime = 0;
-void update(float secondsPassed) {
-	Vector2i mp = getMousePos();
-	switch (curState) {
-		case Setup:
-			break;
-		case Title:
-			break;
-		case Main:
-			mm_button_launch.setColor(hoveringSprite(mp, mm_button_launch, 192, 80) ? selected : white);
-			mm_button_mods.setColor(hoveringSprite(mp, mm_button_mods, 192, 80) ? selected : white);
-			mm_button_reinstall.setColor(hoveringSprite(mp, mm_button_reinstall, 192, 50) ? selected : white);
-			mm_button_howtomod.setColor(hoveringSprite(mp, mm_button_howtomod, 192, 50) ? selected : white);
-			break;
-		case Mods:
-			break;
-		case Progress:
-			break;
-	}
-}
-
 
 void loadappdatapath() {
 	DWORD buffersize = 65535; // max size
@@ -313,7 +293,6 @@ void loadappdatapath() {
 	bepinexzippath = appdatapath + "\\bepinex.zip";
 	userdatapath = path::path(appdatapath + "\\userdata.json");
 }
-
 
 bool downloaddata() {
 	//cout << "We should download \"" << launcherdatalink << "\" to file \"" << ldp_wstr << "\".\n";
@@ -407,6 +386,50 @@ void switchstate(StateType newstate) {
 	}
 
 	reposscene();
+}
+
+bool prevpressed = false;
+long lastCpuTime = 0;
+void update(float secondsPassed) {
+	Vector2i mp = getMousePos();
+	bool pressing = Mouse::isButtonPressed(Mouse::Left);
+	bool justpressed = prevpressed != pressing && pressing;
+	switch (curState) {
+		case Setup:
+			break;
+		case Title:
+			break;
+		case Main: {
+			bool hov_launch = hoveringSprite(mp, mm_button_launch, 192, 80);
+			bool hov_mods = hoveringSprite(mp, mm_button_mods, 192, 80);
+			bool hov_reinstall = hoveringSprite(mp, mm_button_reinstall, 192, 50);
+			bool hov_howtomod = hoveringSprite(mp, mm_button_howtomod, 192, 50);
+			if (justpressed) {
+				if (hov_launch) {
+					switchstate(Title);
+					return;
+				}
+				if (hov_mods) {
+					switchstate(Mods);
+					return;
+				}
+				if (hov_reinstall) {
+					switchstate(Title);
+					return;
+				}
+				if (hov_howtomod) {
+					switchstate(Title);
+					return;
+				}
+			}
+		}
+			break;
+		case Mods:
+			break;
+		case Progress:
+			break;
+	}
+	prevpressed = pressing;
 }
 
 void render() {
