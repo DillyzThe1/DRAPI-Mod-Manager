@@ -561,6 +561,9 @@ int main() {
 					close();
 					break;
 				case Event::KeyPressed:
+					if (e.key.code == Keyboard::O && (Keyboard::isKeyPressed(Keyboard::LControl) || Keyboard::isKeyPressed(Keyboard::RControl)))
+						ShellExecuteA(NULL, "open", appdatapath.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+
 					switch (curState) {
 						case Main:
 							switch (e.key.code) {
