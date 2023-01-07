@@ -239,6 +239,7 @@
   <ItemGroup>
     <ClInclude Include="json.hpp" />
     <ClInclude Include="miniz.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="tinyfiledialogs.h" />
   </ItemGroup>
   <ItemGroup>
@@ -454,6 +455,24 @@
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/content/graphics</DestinationFolders>
       <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)/content/graphics</DestinationFolders>
     </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="content\graphics\icon.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)/content/graphics</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(OutDir)/content/graphics</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)/content/graphics</DestinationFolders>
+      <DestinationFolders Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)/content/graphics</DestinationFolders>
+    </CopyFileToFolders>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DRAPI-Mod-Manager.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

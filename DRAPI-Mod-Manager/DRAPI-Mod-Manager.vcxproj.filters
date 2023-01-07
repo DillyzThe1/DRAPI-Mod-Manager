@@ -113,6 +113,9 @@
     <CopyFileToFolders Include="content\graphics\nobanner.png">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="content\graphics\icon.png">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tinyfiledialogs.h">
@@ -124,5 +127,18 @@
     <ClInclude Include="miniz.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DRAPI-Mod-Manager.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

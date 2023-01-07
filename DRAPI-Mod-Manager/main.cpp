@@ -1088,6 +1088,10 @@ int main() {
 	window.setVerticalSyncEnabled(true);
 	window.requestFocus();
 
+	Texture icontex;
+	icontex.loadFromFile("content/graphics/icon.png");
+	window.setIcon(200, 200, icontex.copyToImage().getPixelsPtr());
+
 	loadappdatapath();
 	if (!downloaddata()) {
 		window.close();
