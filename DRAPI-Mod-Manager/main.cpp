@@ -499,6 +499,7 @@ void update(float secondsPassed) {
 							cout << "Display settings.\n";
 							break;
 						case 2:
+							sfx_appear.play();
 							ShellExecuteA(NULL, "open", innerslothlink.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 							break;
 						case 3: {
@@ -513,6 +514,7 @@ void update(float secondsPassed) {
 							}
 							break;
 						case 4:
+							sfx_appear.play();
 							ShellExecuteA(NULL, "open", discordlink.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 							break;
 					}
@@ -564,6 +566,7 @@ void update(float secondsPassed) {
 				if (hov_howtomod) {
 					cooldown = 1.5;
 					sfx_select.play();
+					sfx_appear.play();
 					//ShellExecuteA(NULL, "open", appdatapath.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 					ShellExecuteA(NULL, "open", wikilink.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 					return;
