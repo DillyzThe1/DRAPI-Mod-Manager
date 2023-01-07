@@ -167,7 +167,9 @@ struct ModData {
 };
 
 int modsactive = 0;
-ModData mods[1000];
+ModData mods[100];
+Texture modbanners[100];
+Sprite curmodbanner;
 
 int curmod = 0;
 
@@ -201,6 +203,8 @@ void reposscene() {
 			break;
 		case Mods: {
 			curmod = 0;
+
+			curmodbanner.setPosition(centx - 1280/2, centy - 720/2);
 
 			modmenu_about.setPosition(centx - 200 - 100, height - 130);
 			modmenu_install.setPosition(centx - 100, height - 160);
@@ -447,14 +451,14 @@ bool downloaddata() {
 		}
 
 		// don't redownload a pre-existing banner
-		if (exists(top10logic))
-			continue;
-
-		//cout << "mdddod " << funnyname << " - " << banner << " - " << top10logic << endl;
-		if (starts_with(banner, "https://"))
+		if (!exists(top10logic) && starts_with(banner, "https://"))
 			download(banner, top10logic);
 		//else
 		//	cout << banner << " doesn't start with https://\n";
+
+		Texture bannertex;
+		bannertex.loadFromFile(exists(top10logic) ? top10logic : "content/graphics/nobanner.png");
+		modbanners[i] = bannertex;
 	}
 	return true;
 }
@@ -579,6 +583,9 @@ void render() {
 		case Mods:
 			if (!modmenu_setup)
 				return;
+
+			window.draw(curmodbanner);
+
 
 			window.draw(modmenu_about);
 			window.draw(modmenu_install);
@@ -808,6 +815,7 @@ void update(float secondsPassed) {
 							curmod = 0;
 						modnametext.setString(mods[curmod].name);
 						modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width/2), modbar.getPosition().y + 50 - 36);
+						curmodbanner.setTexture(modbanners[curmod]);
 						return;
 					}
 					if (hov_right && curmod < modsactive - 1) {
@@ -818,6 +826,7 @@ void update(float secondsPassed) {
 							curmod = modsactive - 1;
 						modnametext.setString(mods[curmod].name);
 						modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width/2), modbar.getPosition().y + 50 - 36);
+						curmodbanner.setTexture(modbanners[curmod]);
 						return;
 					}
 				}
@@ -901,6 +910,9 @@ int main() {
 	modnametext.setCharacterSize(60);
 	modnametext.setString("DillyzRoleApi");
 	//
+
+	curmodbanner.setTexture(modbanners[0]);
+	curmodbanner.setTextureRect(IntRect(0, 0, 1280, 420));
 
 	MessageBox(NULL, L"This program is unfinished, but hello anyway!\nBinds:\n- S to switch to Setup.\n- E to locate EXE.\n- A to download files.\n- O to open your LocalLow folder.\n\nYou only need to hit S once & other binds require an S press.\nOk bye!", titlebutgoofy, MB_ICONINFORMATION);
 

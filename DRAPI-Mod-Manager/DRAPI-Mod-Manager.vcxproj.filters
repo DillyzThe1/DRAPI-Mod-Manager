@@ -110,6 +110,9 @@
     <CopyFileToFolders Include="content\fonts\NOTE.txt">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="content\graphics\nobanner.png">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tinyfiledialogs.h">
