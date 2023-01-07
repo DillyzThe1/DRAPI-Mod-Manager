@@ -464,6 +464,8 @@ bool downloaddata() {
 	bool bConnect = InternetCheckConnection(L"https://www.google.com/", FLAG_ICC_FORCE_CONNECTION, 0);
 	if (!bConnect)
 		return false;
+	remove(launcherdatapath);
+	remove(announcmentsdatapath);
 	download(launcherdataURL, launcherdatapath);
 	download(announcmentdataURL, announcmentsdatapath);
 	
