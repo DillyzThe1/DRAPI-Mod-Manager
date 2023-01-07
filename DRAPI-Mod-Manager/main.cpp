@@ -82,17 +82,21 @@ sf::Sound sfx_hover, sfx_select, sfx_complete, sfx_progress, sfx_appear, sfx_dis
 Font font_ui;
 Text verstext;
 
-// SETUP SCENE VARS
-// TITLE SCENE VARS
 // MAIN MENU SCENE VARS
 bool mm_setup = false;
 Texture mm_buttontex, mm_logotex;
 Sprite mm_logo;
 Sprite mm_button_launch, mm_button_mods, mm_button_reinstall, mm_button_howtomod;
 
+const int mbcount = 5;
+bool mbprevhold[mbcount];
+Sprite minibuttons[mbcount];
+
 bool launchdisabled = false, modsdisabled = false, reinstalldisabled = false, howtodisabled = false;
 bool prevhov_launch = false, prevhov_mods = false, prevhov_reinstall = false, prevhov_howtomod = false;
-// --Sprite mm_minibutton_announcements, mm_minibutton_settings, mm_minibutton_innersloth, mm_minibutton_refresh, mm_minibutton_discord;
+string innerslothlink = "https://www.innersloth.com/", discordlink = "https://discord.gg/49NFTwcYgZ";
+
+float cooldown = 1.5;
 // MODS MENU SCENE VARS
 // PROGRESS SCENE SCENE VARS
 // :sadsping:
@@ -116,6 +120,9 @@ void reposscene() {
 				mm_button_mods.setPosition(Vector2f(centx + 100 + offset, centy));
 				mm_button_reinstall.setPosition(Vector2f(centx - 100 + offset, centy + 90));
 				mm_button_howtomod.setPosition(Vector2f(centx + 100 + offset, centy + 90));
+
+				for (int i = 0; i < mbcount; i++)
+					minibuttons[i].setPosition(centx - ((float)67 / (float)2) + (((float)i*2 - (float)mbcount) + 1) * 50, centy + 180);
 			}
 			break;
 		case Mods:
@@ -368,6 +375,14 @@ void scenesetup_mainmenu() {
 	mm_button_howtomod.setTextureRect(IntRect(400, 88, s1bx, s1by));
 
 
+	for (int i = 0; i < mbcount; i++) {
+		Sprite minibutton;
+		minibutton.setTexture(mm_buttontex);
+		minibutton.setTextureRect(IntRect(75*i, 146, s2bx, s2by));
+		minibuttons[i] = minibutton;
+		mbprevhold[i] = false;
+	}
+
 
 	mm_logo.setPosition(Vector2f(400, 0));
 
@@ -397,46 +412,89 @@ string wikilink = "https://github.com/DillyzThe1/DillyzRoleApi-Rewritten/wiki";
 bool prevpressed = false;
 long lastCpuTime = 0;
 void update(float secondsPassed) {
+	cooldown -= secondsPassed;
 	Vector2i mp = getMousePos();
 	bool pressing = Mouse::isButtonPressed(Mouse::Left);
 	bool justpressed = prevpressed != pressing && pressing;
 	switch (curState) {
 		case Main: {
 			bool hov_launch = !launchdisabled && hoveringSprite(mp, mm_button_launch, 192, 80);
-			if (launchdisabled || installingnow)
+			if (launchdisabled || installingnow || cooldown >= 0)
 				mm_button_launch.setColor(color_deselected);
 
 			bool hov_mods = !modsdisabled && hoveringSprite(mp, mm_button_mods, 192, 80);
-			if (modsdisabled || installingnow)
+			if (modsdisabled || installingnow || cooldown >= 0)
 				mm_button_mods.setColor(color_deselected);
 
 			bool hov_reinstall = !reinstalldisabled && hoveringSprite(mp, mm_button_reinstall, 192, 50);
-			if (reinstalldisabled || installingnow)
+			if (reinstalldisabled || installingnow || cooldown >= 0)
 				mm_button_reinstall.setColor(color_deselected);
 
 			bool hov_howtomod = !howtodisabled && hoveringSprite(mp, mm_button_howtomod, 192, 50);
-			if (howtodisabled || installingnow)
+			if (howtodisabled || installingnow || cooldown >= 0)
 				mm_button_howtomod.setColor(color_deselected);
 
-			if ((hov_launch != prevhov_launch && hov_launch)
-				|| (hov_mods != prevhov_mods && hov_mods)
-				|| (hov_reinstall != prevhov_reinstall && hov_reinstall)
-				|| (hov_howtomod != prevhov_howtomod && hov_howtomod))
+			if (((hov_launch != prevhov_launch && hov_launch && !launchdisabled)
+				|| (hov_mods != prevhov_mods && hov_mods && !modsdisabled)
+				|| (hov_reinstall != prevhov_reinstall && hov_reinstall && !reinstalldisabled)
+				|| (hov_howtomod != prevhov_howtomod && hov_howtomod && !howtodisabled))
+				&& !installingnow && cooldown < 0)
 				sfx_hover.play();
 
-			if (justpressed && !installingnow) {
+			for (int i = 0; i < mbcount; i++) {
+				bool mbhold = hoveringSprite(mp, minibuttons[i], 67, 67);
+				if (installingnow || cooldown >= 0)
+					minibuttons[i].setColor(color_deselected);
+				else if (mbhold != mbprevhold[i] && mbhold)
+					sfx_hover.play();
+				mbprevhold[i] = mbhold;
+
+
+				if (justpressed && !installingnow && mbhold && cooldown < 0) {
+					cooldown = 1.5;
+					sfx_select.play();
+					switch (i) {
+						case 0:
+							cout << "Display announcement.\n";
+							break;
+						case 1:
+							cout << "Display settings.\n";
+							break;
+						case 2:
+							ShellExecuteA(NULL, "open", innerslothlink.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+							break;
+						case 3: {
+								downloaddata(); 
+								ifstream userdata_stream(userdatapath.string());
+								userdata = json::parse(userdata_stream);
+								userdata_stream.close();
+								launchdisabled = modsdisabled = howtodisabled = !userdata["setup_properly"];
+							}
+							break;
+						case 4:
+							ShellExecuteA(NULL, "open", discordlink.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+							break;
+					}
+					return;
+				}
+			}
+
+			if (justpressed && !installingnow && cooldown < 0) {
 				if (hov_launch) {
+					cooldown = 15;
 					sfx_select.play();
 					string exepath = aumoddedpath + exename;
 					ShellExecuteA(NULL, "open", exepath.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 					return;
 				}
 				if (hov_mods) {
+					cooldown = 1.5;
 					sfx_select.play();
 					switchstate(Mods);
 					return;
 				}
 				if (hov_reinstall) {
+					cooldown = 1.5;
 					sfx_select.play();
 					sfx_appear.play();
 					installingnow = true;
@@ -452,6 +510,7 @@ void update(float secondsPassed) {
 					return;
 				}
 				if (hov_howtomod) {
+					cooldown = 1.5;
 					sfx_select.play();
 					//ShellExecuteA(NULL, "open", appdatapath.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 					ShellExecuteA(NULL, "open", wikilink.c_str(), NULL, NULL, SW_SHOWDEFAULT);
@@ -484,6 +543,9 @@ void render() {
 			window.draw(mm_button_mods);
 			window.draw(mm_button_reinstall);
 			window.draw(mm_button_howtomod);
+
+			for (int i = 0; i < mbcount; i++)
+				window.draw(minibuttons[i]);
 			break;
 		case Mods:
 			break;
