@@ -33,7 +33,7 @@ enum StateType {
 Color color_bg(15, 10, 25, 255), color_white(255, 255, 255, 255), color_selected(0, 255, 0, 255), color_deselected(128, 128, 128, 255);
 StateType curState = None;
 
-string launcherdataURL = "https://cdn.discordapp.com/attachments/849292573230104576/1060836092003225681/launcher_latest.json";
+string launcherdataURL = "https://cdn.discordapp.com/attachments/896488124107067422/1061335450305962014/launcher_latest.json";
 string announcmentdataURL = "https://cdn.discordapp.com/attachments/849292573230104576/1060820994429812736/announcement.json";
 
 string appdatapath, aupath, aumoddedpath, launcherdatapath, announcmentsdatapath, bepinexzippath;
@@ -138,6 +138,8 @@ struct ModData {
 	string description;
 	string author;
 
+	string source;
+
 	int dependencycount = 0;
 	ModDependencyData dependencies[10];
 
@@ -145,7 +147,7 @@ struct ModData {
 		this->name = "blank";
 	}
 
-	ModData(string _name, string _file, string _banner, string _bh, int _version, string _vn, string _description, string _author) {
+	ModData(string _name, string _file, string _banner, string _bh, int _version, string _vn, string _description, string _author, string _source) {
 		this->name = _name;
 		this->file = _file;
 		this->banner = _banner;
@@ -154,6 +156,7 @@ struct ModData {
 		this->versionname = _vn;
 		this->description = _description;
 		this->author = _author;
+		this->source = _source;
 	}
 
 	void AddDependency(ModDependencyData d) {
@@ -422,7 +425,8 @@ bool downloaddata() {
 		modsactive++;
 
 		ModData mod(funnyname, launcherjson["mods"][i]["file"], banner, launcherjson["mods"][i]["bannerhash"], launcherjson["mods"][i]["version"],
-			launcherjson["mods"][i]["versionname"], launcherjson["mods"][i]["description"], launcherjson["mods"][i]["author"]);
+			launcherjson["mods"][i]["versionname"], launcherjson["mods"][i]["description"], 
+			launcherjson["mods"][i]["author"], launcherjson["mods"][i]["source"]);
 		mods[i] = mod;
 
 		for (int o = 0; o < launcherjson["mods"][i]["dependencies"].size(); o++) {
@@ -663,7 +667,7 @@ void update(float secondsPassed) {
 					return;
 				}
 				if (hov_mods) {
-					cooldown = 1.5;
+					cooldown = 0.5;
 					sfx_select.play();
 					switchstate(Mods);
 					return;
@@ -708,7 +712,84 @@ void update(float secondsPassed) {
 			prevhov_launch = hov_launch, prevhov_mods = hov_mods, prevhov_reinstall = hov_reinstall, prevhov_howtomod = hov_howtomod;
 		}
 			break;
-		case Mods:
+		case Mods: {
+			bool hov_about = hoveringSprite(mp, modmenu_about, 192, 80);
+			bool hov_install = hoveringSprite(mp, modmenu_install, 192, 80);
+			bool hov_issues = hoveringSprite(mp, modmenu_issues, 192, 80);
+			bool hov_sourcecode = hoveringSprite(mp, modmenu_sourcecode, 192, 50);
+			bool hov_left = hoveringSprite(mp, modmenu_left, 67, 67);
+			bool hov_right = hoveringSprite(mp, modmenu_right, 67, 67);
+
+			if (curmod < 1)
+				modmenu_left.setColor(color_deselected);
+			if (curmod >= modsactive - 1)
+				modmenu_right.setColor(color_deselected);
+
+			if (installingnow || cooldown >= 0) {
+				modmenu_about.setColor(color_deselected);
+				modmenu_install.setColor(color_deselected);
+				modmenu_issues.setColor(color_deselected);
+				modmenu_sourcecode.setColor(color_deselected);
+				modmenu_left.setColor(color_deselected);
+				modmenu_right.setColor(color_deselected);
+			}
+			else {
+				if ((hov_about != prevhov_about && hov_about) || (hov_install != prevhov_install && hov_install)
+					|| (hov_issues != prevhov_issues && hov_issues) || (hov_sourcecode != prevhov_sourcecode && hov_sourcecode)
+					|| (hov_left != prevhov_left && hov_left && curmod > 0) || (hov_right != prevhov_right && hov_right && curmod < modsactive - 1))
+					sfx_hover.play();
+
+				prevhov_about = hov_about;
+				prevhov_install = hov_install;
+				prevhov_issues = hov_issues;
+				prevhov_sourcecode = hov_sourcecode;
+				prevhov_left = hov_left;
+				prevhov_right = hov_right;
+
+				if (justpressed) {
+					ModData mod = mods[curmod];
+					if (hov_about) {
+						cooldown = 1.5;
+						sfx_select.play();
+						string t = mod.name + " " + mod.versionname + " - by " + mod.author;
+						MessageBox(NULL, wstring(mod.description.begin(), mod.description.end()).c_str(), wstring(t.begin(), t.end()).c_str(), MB_ICONINFORMATION);
+						return;
+					}
+					if (hov_install) {
+						cooldown = 1.5;
+						sfx_select.play();
+						return;
+					}
+					if (hov_issues) {
+						cooldown = 1.5;
+						sfx_select.play();
+						return;
+					}
+					if (hov_sourcecode) {
+						cooldown = 1.5;
+						sfx_select.play();
+						ShellExecuteA(NULL, "open", mod.source.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+						return;
+					}
+					if (hov_left && curmod > 0) {
+						cooldown = 0.5;
+						sfx_select.play();
+						curmod--;
+						if (curmod < 0)
+							curmod = 0;
+						return;
+					}
+					if (hov_right && curmod < modsactive - 1) {
+						cooldown = 0.5;
+						sfx_select.play();
+						curmod++;
+						if (curmod >= modsactive)
+							curmod = modsactive - 1;
+						return;
+					}
+				}
+			}
+		}
 
 			break;
 		case Progress:
