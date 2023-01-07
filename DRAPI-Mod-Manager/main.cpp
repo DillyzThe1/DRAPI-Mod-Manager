@@ -180,8 +180,17 @@ bool installingnow = false;
 const string exename = "Among Us.exe";
 char const* AmongUsExeFilter[1] = { exename.c_str() };
 bool locateexe() {
+	char *funny_old = tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
+
+	//cout << "xd\n";
+	if (((funny_old != NULL) && (funny_old[0] == '\0')) || funny_old == NULL)
+		return false; // it was skipped
+
+	// convert for funny
+	string funny = funny_old;
+
 	userdata["setup_properly"] = false;
-	string funny = tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
+	saveuserdata();
 	cout << "File Opened: " << funny << "\n";
 	if (ends_with(funny, exename)) {
 		aupath = funny.substr(0, funny.length() - exename.length());
@@ -426,16 +435,13 @@ void update(float secondsPassed) {
 				if (hov_reinstall) {
 					sfx_select.play();
 					sfx_appear.play();
-					try {
-						installingnow = true;
-						bool exefound = locateexe();
-						cout << "Exe " << (exefound == 1 ? "properly" : "improperly") << " found.\n";
+					installingnow = true;
+					bool exefound = locateexe();
+					cout << "Exe " << (exefound == 1 ? "properly" : "improperly") << " found.\n";
+					if (exefound)
 						sfx_complete.play();
-					}
-					catch (exception e) {
-						cout << "Could not properly setup Among Us directory! Reason: " << e.what() << ".\n";
+					else
 						sfx_progress.play();
-					}
 					launchdisabled = modsdisabled = howtodisabled = !userdata["setup_properly"];
 					installingnow = false;
 					sfx_disappear.play();
@@ -570,6 +576,9 @@ int main() {
 							switch (e.key.code) {
 								case Keyboard::Escape:
 									switchstate(Main);
+									break;
+								case Keyboard::A:
+									tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
 									break;
 							}
 							break;
