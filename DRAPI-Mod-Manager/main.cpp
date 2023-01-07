@@ -632,26 +632,30 @@ void downloadmod(ModData mod, int action) {
 			if (mod.dependencycount != 0) {
 				string aa = "The following dependencies may be downloaded:\n";
 
-				for (int i = 0; i < mod.dependencycount; i++)
-					aa += "- " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + "\n";
-
-				MessageBox(NULL, wstring(aa.begin(), aa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
-
 				for (int i = 0; i < mod.dependencycount; i++) {
-					bool gotit = false;
-					for (int o = 0; o < modsactive; o++)
-						if (mods[o].name == mod.dependencies[i].name) {
-							for (int p = 0; p < userdata["mods_installed"].size(); p++)
-								if (userdata["mods_installed"][p]["name"] == mods[o].name && userdata["mods_installed"][p]["version"] == mods[o].version)
-									gotit = true;
-							if (!gotit)
+					path funnypath(aumoddedpath + "/BepInEx/plugins/" + mods[i].name + ".dll");
+					if (!exists(funnypath))
+						aa += "- " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + "\n";
+				}
+
+				if (aa.length() >= 48) {
+					MessageBox(NULL, wstring(aa.begin(), aa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+
+					for (int i = 0; i < mod.dependencycount; i++) {
+						path funnypath(aumoddedpath + "/BepInEx/plugins/" + mods[i].name + ".dll");
+						if (exists(funnypath))
+							continue;
+						bool gotit = false;
+						for (int o = 0; o < modsactive; o++)
+							if (mods[o].name == mod.dependencies[i].name) {
 								downloadmod(mods[0], 0);
-							gotit = true;
+								gotit = true;
+							}
+						if (!gotit) {
+							string aaa = "Dependency " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + " not found!\nAborting mod download.";
+							MessageBox(NULL, wstring(aaa.begin(), aaa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+							return;
 						}
-					if (!gotit) {
-						string aaa = "Dependency " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + " not found!\nAborting mod download.";
-						MessageBox(NULL, wstring(aaa.begin(), aaa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
-						return;
 					}
 				}
 			}
@@ -689,26 +693,29 @@ void downloadmod(ModData mod, int action) {
 			if (mod.dependencycount != 0) {
 				string aa = "The following dependencies may be installed:\n";
 
-				for (int i = 0; i < mod.dependencycount; i++)
-					aa += "- " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + "\n";
-
-				MessageBox(NULL, wstring(aa.begin(), aa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
-
 				for (int i = 0; i < mod.dependencycount; i++) {
-					bool gotit = false;
-					for (int o = 0; o < modsactive; o++)
-						if (mods[o].name == mod.dependencies[i].name) {
-							for (int p = 0; p < userdata["mods_installed"].size(); p++)
-								if (userdata["mods_installed"][p]["name"] == mods[o].name && userdata["mods_installed"][p]["last_version"] == mods[o].version)
-									gotit = true;
-							if (!gotit)
+					path funnypath(aumoddedpath + "/BepInEx/plugins/" + mods[i].name + ".dll");
+					if (!exists(funnypath))
+						aa += "- " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + "\n";
+				}
+				if (aa.length() >= 48) {
+					MessageBox(NULL, wstring(aa.begin(), aa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+
+					for (int i = 0; i < mod.dependencycount; i++) {
+						path funnypath(aumoddedpath + "/BepInEx/plugins/" + mods[i].name + ".dll");
+						if (exists(funnypath))
+							continue;
+						bool gotit = false;
+						for (int o = 0; o < modsactive; o++)
+							if (mods[o].name == mod.dependencies[i].name) {
 								downloadmod(mods[0], 0);
-							gotit = true;
+								gotit = true;
+							}
+						if (!gotit) {
+							string aaa = "Dependency " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + " not found!\nAborting mod download.";
+							MessageBox(NULL, wstring(aaa.begin(), aaa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+							return;
 						}
-					if (!gotit) {
-						string aaa = "Dependency " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + " not found!\nAborting mod download.";
-						MessageBox(NULL, wstring(aaa.begin(), aaa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
-						return;
 					}
 				}
 			}
