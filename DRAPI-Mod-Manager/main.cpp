@@ -52,7 +52,8 @@ json userdata = {
 		{
 			{"name", "DillyzRoleApi"},
 			{"last_version", -1},
-			{"last_versionname", "v0.0.0-dev"}
+			{"last_versionname", "v0.0.0-dev"},
+			{"active", true}
 		}
 	}}
 };
@@ -181,32 +182,38 @@ int availableInstallerAction = 0; // 0 to install, 1 to update, 2 to uninstall
 // :sadsping:
 
 void modmenu_move(int amt) {
-	if (cooldown >= 0 || (amt < 0 && curmod < 1) || (amt > 0 && curmod >= modsactive - 1))
+	if (curmod + amt < 0 || curmod + amt >= modsactive)
 		return;
 
-	curmod += amt;
-	cooldown = 0.175;
+	if (amt != 0) {
+		if (cooldown >= 0)
+			return;
 
-	if (amt != 0)
+		cooldown = 0.175;
+		curmod += amt;
 		sfx_select.play();
-
-	if (curmod < 0)
-		curmod = 0;
-	else if (curmod >= modsactive)
-		curmod = modsactive - 1;
+		if (curmod < 0)
+			curmod = 0;
+		else if (curmod >= modsactive)
+			curmod = modsactive - 1;
+	}
 
 	modnametext.setString(mods[curmod].name);
 	modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width / 2), modbar.getPosition().y + 50 - 36);
 	curmodbanner.setTexture(modbanners[curmod]);
 
+	//cout << "getting there\n";
 	availableInstallerAction = 0;
 	modmenu_install.setTextureRect(installrect);
 	for (int i = 0; i < userdata["mods_installed"].size(); i++) {
+		if (!userdata["mods_installed"][i]["active"])
+			continue;
+
 		string name = userdata["mods_installed"][i]["name"];
 		int l_version = userdata["mods_installed"][i]["last_version"];
 		string l_versionname = userdata["mods_installed"][i]["last_versionname"];
 
-		cout << name << " update #" << l_version << " vs " << mods[curmod].name << " update #" << mods[curmod].version << endl;
+		//cout << name << " update #" << l_version << " vs " << mods[curmod].name << " update #" << mods[curmod].version << endl;
 		if (name != mods[curmod].name)
 			continue;
 
@@ -834,6 +841,93 @@ void update(float secondsPassed) {
 					if (hov_install) {
 						cooldown = 1.5;
 						sfx_select.play();
+
+						modmenu_about.setColor(color_deselected);
+						modmenu_issues.setColor(color_deselected);
+						modmenu_sourcecode.setColor(color_deselected);
+						modmenu_left.setColor(color_deselected);
+						modmenu_right.setColor(color_deselected);
+						render();
+
+
+						path filedest(aumoddedpath + "/BepInEx/plugins/" + mod.name + ".dll");
+						switch (availableInstallerAction) {
+							case 0: {
+								if (!starts_with(mod.file, "https://")) {
+									string t = mod.name + " " + mod.versionname + " - by " + mod.author;
+									MessageBox(NULL, L"Download link missing!", wstring(t.begin(), t.end()).c_str(), MB_ICONERROR);
+									modmenu_move(0);
+									return;
+								}
+								string filepath = filedest.string();
+								download(mod.file, filepath);
+
+								for (int o = 0; o < userdata["mods_installed"].size(); o++)
+									if (userdata["mods_installed"][o]["name"] == mod.name) {
+										userdata["mods_installed"][o]["active"] = true;
+										saveuserdata();
+										modmenu_move(0);
+										return;
+									}
+
+								int i = userdata["mods_installed"].size();
+								userdata["mods_installed"][i]["name"] = mod.name;
+								userdata["mods_installed"][i]["last_version"] = mod.version;
+								userdata["mods_installed"][i]["last_versionname"] = mod.versionname;
+								userdata["mods_installed"][i]["active"] = true;
+								saveuserdata();
+								modmenu_move(0);
+
+							}
+								break;
+							case 1: {
+								if (!starts_with(mod.file, "https://")) {
+									string t = mod.name + " " + mod.versionname + " - by " + mod.author;
+									MessageBox(NULL, L"Download link missing!", wstring(t.begin(), t.end()).c_str(), MB_ICONERROR);
+									modmenu_move(0);
+									return;
+								}
+								int i = userdata["mods_installed"].size();
+
+								for (int o = 0; o < userdata["mods_installed"].size(); o++)
+									if (userdata["mods_installed"][o]["name"] == mod.name) {
+										cout << "found ur mod\n";
+										i = o;
+									}
+
+								userdata["mods_installed"][i]["name"] = mod.name;
+								userdata["mods_installed"][i]["last_version"] = mod.version;
+								userdata["mods_installed"][i]["last_versionname"] = mod.versionname;
+								userdata["mods_installed"][i]["active"] = true;
+								saveuserdata();
+								modmenu_move(0);
+
+								string filepath = filedest.string();
+								download(mod.file, filepath);
+							}
+								  break;
+							case 2:
+								if (!exists(filedest)) {
+									string t = mod.name + " " + mod.versionname + " - by " + mod.author;
+									MessageBox(NULL, L"Mod DLL missing!", wstring(t.begin(), t.end()).c_str(), MB_ICONERROR);
+
+									for (int i = 0; i < userdata["mods_installed"].size(); i++)
+										if (userdata["mods_installed"][i]["name"] == mod.name)
+											userdata["mods_installed"][i]["active"] = false;
+									saveuserdata();
+									modmenu_move(0);
+									return;
+								}
+
+								for (int i = 0; i < userdata["mods_installed"].size(); i++)
+									if (userdata["mods_installed"][i]["name"] == mod.name)
+										userdata["mods_installed"][i]["active"] = false;
+								saveuserdata();
+								modmenu_move(0);
+
+								remove(filedest);
+								break;
+						}
 						return;
 					}
 					if (hov_issues) {
