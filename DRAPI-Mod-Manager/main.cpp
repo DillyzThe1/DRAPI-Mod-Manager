@@ -342,6 +342,9 @@ bool locateexe() {
 	if (((funny_old != NULL) && (funny_old[0] == '\0')) || funny_old == NULL)
 		return false; // it was skipped
 
+	for (int i = 0; i < userdata["mods_installed"].size(); i++)
+		userdata["mods_installed"][i]["active"] = false;
+
 	// convert for funny
 	string funny = funny_old;
 
