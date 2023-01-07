@@ -307,7 +307,9 @@ void showannouncement() {
 	string pranked = announcementjson["text"];
 	userdata["last_announcement"] = announcementjson["version"];
 	saveuserdata();
+	sfx_appear.play();
 	MessageBox(NULL, wstring(pranked.begin(), pranked.end()).c_str(), wstring(title.begin(), title.end()).c_str(), MB_ICONINFORMATION);
+	sfx_disappear.play();
 }
 
 bool downloaddata() {
