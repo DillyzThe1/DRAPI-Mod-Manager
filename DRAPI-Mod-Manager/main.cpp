@@ -604,6 +604,22 @@ void render() {
 	window.display();
 }
 
+void modmenu_move(int amt) {
+	if (cooldown >= 0 || (amt < 0 && curmod < 1) || (amt > 0 && curmod >= modsactive - 1))
+		return;
+
+	curmod += amt;
+	cooldown = 0.175;
+	sfx_select.play();
+	if (curmod < 0)
+		curmod = 0;
+	else if (curmod >= modsactive)
+		curmod = modsactive - 1;
+	modnametext.setString(mods[curmod].name);
+	modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width / 2), modbar.getPosition().y + 50 - 36);
+	curmodbanner.setTexture(modbanners[curmod]);
+}
+
 string wikilink = "https://github.com/DillyzThe1/DillyzRoleApi-Rewritten/wiki";
 bool prevpressed = false;
 long lastCpuTime = 0;
@@ -808,25 +824,11 @@ void update(float secondsPassed) {
 						return;
 					}
 					if (hov_left && curmod > 0) {
-						cooldown = 0.5;
-						sfx_select.play();
-						curmod--;
-						if (curmod < 0)
-							curmod = 0;
-						modnametext.setString(mods[curmod].name);
-						modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width/2), modbar.getPosition().y + 50 - 36);
-						curmodbanner.setTexture(modbanners[curmod]);
+						modmenu_move(-1);
 						return;
 					}
 					if (hov_right && curmod < modsactive - 1) {
-						cooldown = 0.5;
-						sfx_select.play();
-						curmod++;
-						if (curmod >= modsactive)
-							curmod = modsactive - 1;
-						modnametext.setString(mods[curmod].name);
-						modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width/2), modbar.getPosition().y + 50 - 36);
-						curmodbanner.setTexture(modbanners[curmod]);
+						modmenu_move(1);
 						return;
 					}
 				}
@@ -951,8 +953,11 @@ int main() {
 								case Keyboard::Escape:
 									switchstate(Main);
 									break;
-								case Keyboard::A:
-									tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
+								case Keyboard::Left:
+									modmenu_move(-1);
+									break;
+								case Keyboard::Right:
+									modmenu_move(1);
 									break;
 							}
 							break;
