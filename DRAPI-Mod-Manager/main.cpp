@@ -31,7 +31,7 @@ enum StateType {
 	Progress  // the download progress screen, where you'll be until something finishes installing
 };
 
-Color bgcolor(15, 10, 25, 255), white(255, 255, 255, 255), selected(0, 255, 0, 255);
+Color color_bg(15, 10, 25, 255), color_white(255, 255, 255, 255), color_selected(0, 255, 0, 255);
 StateType curState = None;
 
 string launcherdataURL = "https://cdn.discordapp.com/attachments/849292573230104576/1060836092003225681/launcher_latest.json";
@@ -264,7 +264,7 @@ bool locateexe() {
 bool hoveringSprite(Vector2i& mp, Sprite& spr, int width, int height) {
 	Vector2i coolstuffs = Vector2i(mp.x - spr.getPosition().x, mp.y - spr.getPosition().y);
 	bool hovering = !(coolstuffs.x < 0 || coolstuffs.y < 0 || coolstuffs.x > width || coolstuffs.y > height);
-	spr.setColor(hovering ? selected : white);
+	spr.setColor(hovering ? color_selected : color_white);
 	return hovering;
 }
 
@@ -433,7 +433,7 @@ void update(float secondsPassed) {
 }
 
 void render() {
-	window.clear(bgcolor);
+	window.clear(color_bg);
 
 	switch (curState) {
 		case Setup:
