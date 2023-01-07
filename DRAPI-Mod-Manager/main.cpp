@@ -79,7 +79,7 @@ Vector2i getMousePos() {
 sf::SoundBuffer sb_hover, sb_select, sb_complete, sb_progress, sb_appear, sb_disappear;
 sf::Sound sfx_hover, sfx_select, sfx_complete, sfx_progress, sfx_appear, sfx_disappear;
 
-Font font_ui;
+Font font_ui, font_buttons;
 Text verstext;
 
 
@@ -99,8 +99,9 @@ bool launchdisabled = false, modsdisabled = false, reinstalldisabled = false, ho
 bool prevhov_launch = false, prevhov_mods = false, prevhov_reinstall = false, prevhov_howtomod = false;
 string innerslothlink = "https://www.innersloth.com/", discordlink = "https://discord.gg/49NFTwcYgZ";
 // MODS MENU SCENE VARS
-Texture modmenu_buttontex;
+Texture modmenu_buttontex, modmenu_modbartex;
 bool modmenu_setup = false;
+Sprite modbar;
 Sprite modmenu_about, modmenu_install, modmenu_issues, modmenu_sourcecode;
 Sprite modmenu_left, modmenu_right;
 bool prevhov_about = false, prevhov_install = false, prevhov_issues = false, prevhov_sourcecode = false, prevhov_left = false, prevhov_right = false;
@@ -169,6 +170,8 @@ int modsactive = 0;
 ModData mods[1000];
 
 int curmod = 0;
+
+Text modnametext;
 // PROGRESS SCENE SCENE VARS
 // :sadsping:
 
@@ -196,7 +199,9 @@ void reposscene() {
 					minibuttons[i].setPosition(centx - ((float)67 / (float)2) + (((float)i*2 - (float)mbcount) + 1) * 50, centy + 160);
 			}
 			break;
-		case Mods:
+		case Mods: {
+			curmod = 0;
+
 			modmenu_about.setPosition(centx - 200 - 100, height - 130);
 			modmenu_install.setPosition(centx - 100, height - 160);
 			modmenu_issues.setPosition(centx + 200 - 100, height - 130);
@@ -206,6 +211,12 @@ void reposscene() {
 
 			modmenu_left.setPosition(50, height - 45 - 67);
 			modmenu_right.setPosition(width - 117, height - 45 - 67);
+
+			modbar.setScale(Vector2f(width >= 2000 ? width / 2000 : 1, 1));
+			modbar.setPosition(0, centy + 65);
+
+			modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width / 2), modbar.getPosition().y + 50 - 36);
+		}
 			break;
 		case Progress:
 			break;
@@ -524,6 +535,9 @@ void scenesetup_modmenu() {
 	modmenu_right.setTexture(modmenu_buttontex);
 	modmenu_right.setTextureRect(IntRect(75, 146, 67, 67));
 
+	modmenu_modbartex.loadFromFile("content/graphics/modbar.png");
+	modbar.setTexture(modmenu_modbartex);
+
 	reposscene();
 }
 
@@ -548,34 +562,35 @@ void render() {
 	window.clear(color_bg);
 
 	switch (curState) {
-	case Main:
-		if (!mm_setup)
-			return;
+		case Main:
+			if (!mm_setup)
+				return;
 
-		window.draw(mm_logo);
+			window.draw(mm_logo);
 
-		window.draw(mm_button_launch);
-		window.draw(mm_button_mods);
-		window.draw(mm_button_reinstall);
-		window.draw(mm_button_howtomod);
+			window.draw(mm_button_launch);
+			window.draw(mm_button_mods);
+			window.draw(mm_button_reinstall);
+			window.draw(mm_button_howtomod);
 
-		for (int i = 0; i < mbcount; i++)
-			window.draw(minibuttons[i]);
-		break;
-	case Mods:
-		if (!modmenu_setup)
-			return;
+			for (int i = 0; i < mbcount; i++)
+				window.draw(minibuttons[i]);
+			break;
+		case Mods:
+			if (!modmenu_setup)
+				return;
 
-		window.draw(modmenu_about);
-		window.draw(modmenu_install);
-		window.draw(modmenu_issues);
-		window.draw(modmenu_sourcecode);
+			window.draw(modmenu_about);
+			window.draw(modmenu_install);
+			window.draw(modmenu_issues);
+			window.draw(modmenu_sourcecode);
 
-		window.draw(modmenu_left);
-		window.draw(modmenu_right);
-		break;
-	case Progress:
-		break;
+			window.draw(modmenu_left);
+			window.draw(modmenu_right);
+
+			window.draw(modbar);
+			window.draw(modnametext);
+			break; 
 	}
 
 	window.draw(verstext);
@@ -791,6 +806,8 @@ void update(float secondsPassed) {
 						curmod--;
 						if (curmod < 0)
 							curmod = 0;
+						modnametext.setString(mods[curmod].name);
+						modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width/2), modbar.getPosition().y + 50 - 36);
 						return;
 					}
 					if (hov_right && curmod < modsactive - 1) {
@@ -799,12 +816,13 @@ void update(float secondsPassed) {
 						curmod++;
 						if (curmod >= modsactive)
 							curmod = modsactive - 1;
+						modnametext.setString(mods[curmod].name);
+						modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width/2), modbar.getPosition().y + 50 - 36);
 						return;
 					}
 				}
 			}
 		}
-
 			break;
 		case Progress:
 			break;
@@ -875,6 +893,13 @@ int main() {
 	verstext.setString("v" + launcherversionname + " (build num " + to_string(launcherversion) + ")");
 	verstext.setOutlineColor(Color::Black);
 	verstext.setOutlineThickness(2);
+
+	font_buttons.loadFromFile("content/fonts/AmaticSC-Bold.ttf");
+	modnametext.setFont(font_buttons);
+	modnametext.setOutlineColor(Color::Black);
+	modnametext.setOutlineThickness(2);
+	modnametext.setCharacterSize(60);
+	modnametext.setString("DillyzRoleApi");
 	//
 
 	MessageBox(NULL, L"This program is unfinished, but hello anyway!\nBinds:\n- S to switch to Setup.\n- E to locate EXE.\n- A to download files.\n- O to open your LocalLow folder.\n\nYou only need to hit S once & other binds require an S press.\nOk bye!", titlebutgoofy, MB_ICONINFORMATION);
