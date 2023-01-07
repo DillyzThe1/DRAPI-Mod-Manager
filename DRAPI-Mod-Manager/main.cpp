@@ -193,6 +193,7 @@ char const* AmongUsExeFilter[1] = { exename.c_str() };
 bool locateexe() {
 	char *funny_old = tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
 
+	sfx_disappear.play();
 	//cout << "xd\n";
 	if (((funny_old != NULL) && (funny_old[0] == '\0')) || funny_old == NULL)
 		return false; // it was skipped
@@ -555,7 +556,6 @@ void update(float secondsPassed) {
 						sfx_progress.play();
 					launchdisabled = modsdisabled = howtodisabled = !userdata["setup_properly"];
 					installingnow = false;
-					sfx_disappear.play();
 					cooldown = 1.5;
 					return;
 				}
