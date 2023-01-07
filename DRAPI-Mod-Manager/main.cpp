@@ -1149,7 +1149,7 @@ int main() {
 	//
 
 	curmodbanner.setTexture(modbanners[0]);
-	curmodbanner.setTextureRect(IntRect(0, 0, 1280, 420));
+	curmodbanner.setTextureRect(IntRect(0, 0, 1280, 480));
 
 	switchstate(Main);
 	render();
