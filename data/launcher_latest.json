@@ -13,7 +13,7 @@
 			"banner": "https://raw.githubusercontent.com/DillyzThe1/DRAPI-Mod-Manager/main/data/banners/api.png",
 			"bannerhash": "4ebd41ef25b01f1f07d5248114cf9b89",
 			"version": 0,
-			"versionname": "v2.1.0",
+			"versionname": "v2.1.0-dev",
 			"description": "A huge API that improves Among Us for users and modders!\nMake roles in minutes!",
 			"author": "DillyzThe1",
 			"dependencies": []
@@ -25,14 +25,14 @@
 			"banner": "",
 			"bannerhash": "",
 			"version": 0,
-			"versionname": "v1.1.0",
+			"versionname": "v1.1.0-dev",
 			"description": "3 classic roles in one brand new package!",
 			"author": "DillyzThe1",
 			"dependencies": [
 				{
 					"name": "DillyzRoleApi",
 					"version": 0,
-					"versionname": "v2.1.0"
+					"versionname": "v2.1.0-dev"
 				}
 			]
 		},
@@ -43,14 +43,14 @@
 			"source": "https://github.com/DillyzThe1/DillyzLegacyPack",
 			"bannerhash": "8a414cabe8af6ad98fd0b83dfb96f9d3",
 			"version": 0,
-			"versionname": "v1.0.0",
+			"versionname": "v1.0.0-dev",
 			"description": "3 of the original Dillyz roles alongside 1 brand new reimagined mod as a role!",
 			"author": "DillyzThe1",
 			"dependencies": [
 				{
 					"name": "DillyzRoleApi",
 					"version": 0,
-					"versionname": "v2.1.0"
+					"versionname": "v2.1.0-dev"
 				}
 			]
 		}
