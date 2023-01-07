@@ -623,7 +623,9 @@ void downloadmod(ModData mod, int action) {
 	switch (action) {
 		case 0: {
 			if (!starts_with(mod.file, "https://")) {
+				sfx_appear.play();
 				MessageBox(NULL, L"Download link missing!", wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONERROR);
+				sfx_disappear.play();
 				modmenu_move(0);
 				return;
 			}
@@ -639,7 +641,9 @@ void downloadmod(ModData mod, int action) {
 				}
 
 				if (aa.length() >= 48) {
+					sfx_appear.play();
 					MessageBox(NULL, wstring(aa.begin(), aa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+					sfx_disappear.play();
 
 					for (int i = 0; i < mod.dependencycount; i++) {
 						path funnypath(aumoddedpath + "/BepInEx/plugins/" + mods[i].name + ".dll");
@@ -653,7 +657,9 @@ void downloadmod(ModData mod, int action) {
 							}
 						if (!gotit) {
 							string aaa = "Dependency " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + " not found!\nAborting mod download.";
+							sfx_appear.play();
 							MessageBox(NULL, wstring(aaa.begin(), aaa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+							sfx_disappear.play();
 							return;
 						}
 					}
@@ -684,7 +690,9 @@ void downloadmod(ModData mod, int action) {
 		case 1: {
 			if (!starts_with(mod.file, "https://")) {
 				string t = mod.name + " " + mod.versionname + " - by " + mod.author;
+				sfx_appear.play();
 				MessageBox(NULL, L"Download link missing!", wstring(t.begin(), t.end()).c_str(), MB_ICONERROR);
+				sfx_disappear.play();
 				modmenu_move(0);
 				return;
 			}
@@ -699,7 +707,9 @@ void downloadmod(ModData mod, int action) {
 						aa += "- " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + "\n";
 				}
 				if (aa.length() >= 48) {
+					sfx_appear.play();
 					MessageBox(NULL, wstring(aa.begin(), aa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+					sfx_disappear.play();
 
 					for (int i = 0; i < mod.dependencycount; i++) {
 						path funnypath(aumoddedpath + "/BepInEx/plugins/" + mods[i].name + ".dll");
@@ -713,7 +723,9 @@ void downloadmod(ModData mod, int action) {
 							}
 						if (!gotit) {
 							string aaa = "Dependency " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + " not found!\nAborting mod download.";
+							sfx_appear.play();
 							MessageBox(NULL, wstring(aaa.begin(), aaa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+							sfx_disappear.play();
 							return;
 						}
 					}
@@ -742,7 +754,9 @@ void downloadmod(ModData mod, int action) {
 		case 2:
 			if (!exists(filedest)) {
 				string t = mod.name + " " + mod.versionname + " - by " + mod.author;
+				sfx_appear.play();
 				MessageBox(NULL, L"Mod DLL missing!", wstring(t.begin(), t.end()).c_str(), MB_ICONERROR);
+				sfx_disappear.play();
 
 				for (int i = 0; i < userdata["mods_installed"].size(); i++)
 					if (userdata["mods_installed"][i]["name"] == mod.name)
@@ -764,7 +778,9 @@ void downloadmod(ModData mod, int action) {
 			}
 
 			if (aa.length() >= 48) {
+				sfx_appear.play();
 				MessageBox(NULL, wstring(aa.begin(), aa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+				sfx_disappear.play();
 
 				for (int i = 0; i < modsactive; i++) {
 					path funnypath(aumoddedpath + "/BepInEx/plugins/" + mods[i].name + ".dll");
