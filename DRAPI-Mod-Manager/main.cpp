@@ -616,6 +616,170 @@ void switchstate(StateType newstate) {
 	reposscene();
 }
 
+void downloadmod(ModData mod, int action) {
+	cout << "Modifying " << mod.name << " " << mod.versionname << endl;
+	path filedest(aumoddedpath + "/BepInEx/plugins/" + mod.name + ".dll");
+	string popuptitle = mod.name + " " + mod.versionname + " - by " + mod.author;
+	switch (action) {
+		case 0: {
+			if (!starts_with(mod.file, "https://")) {
+				MessageBox(NULL, L"Download link missing!", wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONERROR);
+				modmenu_move(0);
+				return;
+			}
+
+			// i am so absolutely sorry for this dependency downloader
+			if (mod.dependencycount != 0) {
+				string aa = "The following dependencies may be downloaded:\n";
+
+				for (int i = 0; i < mod.dependencycount; i++)
+					aa += "- " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + "\n";
+
+				MessageBox(NULL, wstring(aa.begin(), aa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+
+				for (int i = 0; i < mod.dependencycount; i++) {
+					bool gotit = false;
+					for (int o = 0; o < modsactive; o++)
+						if (mods[o].name == mod.dependencies[i].name) {
+							for (int p = 0; p < userdata["mods_installed"].size(); p++)
+								if (userdata["mods_installed"][p]["name"] == mods[o].name && userdata["mods_installed"][p]["version"] == mods[o].version)
+									gotit = true;
+							if (!gotit)
+								downloadmod(mods[0], 0);
+							gotit = true;
+						}
+					if (!gotit) {
+						string aaa = "Dependency " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + " not found!\nAborting mod download.";
+						MessageBox(NULL, wstring(aaa.begin(), aaa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+						return;
+					}
+				}
+			}
+
+			string filepath = filedest.string();
+			download(mod.file, filepath);
+
+			for (int o = 0; o < userdata["mods_installed"].size(); o++)
+				if (userdata["mods_installed"][o]["name"] == mod.name) {
+					userdata["mods_installed"][o]["active"] = true;
+					saveuserdata();
+					modmenu_move(0);
+					return;
+				}
+
+			int i = userdata["mods_installed"].size();
+			userdata["mods_installed"][i]["name"] = mod.name;
+			userdata["mods_installed"][i]["last_version"] = mod.version;
+			userdata["mods_installed"][i]["last_versionname"] = mod.versionname;
+			userdata["mods_installed"][i]["active"] = true;
+			saveuserdata();
+			modmenu_move(0);
+
+		}
+			  break;
+		case 1: {
+			if (!starts_with(mod.file, "https://")) {
+				string t = mod.name + " " + mod.versionname + " - by " + mod.author;
+				MessageBox(NULL, L"Download link missing!", wstring(t.begin(), t.end()).c_str(), MB_ICONERROR);
+				modmenu_move(0);
+				return;
+			}
+
+			// i am so absolutely sorry for this dependency downloader
+			if (mod.dependencycount != 0) {
+				string aa = "The following dependencies may be installed:\n";
+
+				for (int i = 0; i < mod.dependencycount; i++)
+					aa += "- " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + "\n";
+
+				MessageBox(NULL, wstring(aa.begin(), aa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+
+				for (int i = 0; i < mod.dependencycount; i++) {
+					bool gotit = false;
+					for (int o = 0; o < modsactive; o++)
+						if (mods[o].name == mod.dependencies[i].name) {
+							for (int p = 0; p < userdata["mods_installed"].size(); p++)
+								if (userdata["mods_installed"][p]["name"] == mods[o].name && userdata["mods_installed"][p]["last_version"] == mods[o].version)
+									gotit = true;
+							if (!gotit)
+								downloadmod(mods[0], 0);
+							gotit = true;
+						}
+					if (!gotit) {
+						string aaa = "Dependency " + mod.dependencies[i].name + " " + mod.dependencies[i].versionname + " not found!\nAborting mod download.";
+						MessageBox(NULL, wstring(aaa.begin(), aaa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+						return;
+					}
+				}
+			}
+
+			int i = userdata["mods_installed"].size();
+
+			for (int o = 0; o < userdata["mods_installed"].size(); o++)
+				if (userdata["mods_installed"][o]["name"] == mod.name) {
+					cout << "found ur mod\n";
+					i = o;
+				}
+
+			userdata["mods_installed"][i]["name"] = mod.name;
+			userdata["mods_installed"][i]["last_version"] = mod.version;
+			userdata["mods_installed"][i]["last_versionname"] = mod.versionname;
+			userdata["mods_installed"][i]["active"] = true;
+			saveuserdata();
+			modmenu_move(0);
+
+			string filepath = filedest.string();
+			download(mod.file, filepath);
+		}
+			  break;
+		case 2:
+			if (!exists(filedest)) {
+				string t = mod.name + " " + mod.versionname + " - by " + mod.author;
+				MessageBox(NULL, L"Mod DLL missing!", wstring(t.begin(), t.end()).c_str(), MB_ICONERROR);
+
+				for (int i = 0; i < userdata["mods_installed"].size(); i++)
+					if (userdata["mods_installed"][i]["name"] == mod.name)
+						userdata["mods_installed"][i]["active"] = false;
+				saveuserdata();
+				modmenu_move(0);
+				return;
+			}
+
+			// i am so absolutely sorry for this dependent uninstaller
+			string aa = "The following dependents may be uninstalled:\n";
+
+			for (int i = 0; i < modsactive; i++) {
+				path funnypath(aumoddedpath + "/BepInEx/plugins/" + mods[i].name + ".dll");
+				if (exists(funnypath))
+					for (int o = 0; o < mods[i].dependencycount; o++)
+						if (mods[i].dependencies[o].name == mod.name)
+							aa += "- " + mods[i].name + " " + mods[i].versionname + "\n";
+			}
+
+			if (aa.length() >= 48) {
+				MessageBox(NULL, wstring(aa.begin(), aa.end()).c_str(), wstring(popuptitle.begin(), popuptitle.end()).c_str(), MB_ICONINFORMATION);
+
+				for (int i = 0; i < modsactive; i++) {
+					path funnypath(aumoddedpath + "/BepInEx/plugins/" + mods[i].name + ".dll");
+					if (exists(funnypath))
+						for (int o = 0; o < mods[i].dependencycount; o++)
+							if (mods[i].dependencies[o].name == mod.name)
+								downloadmod(mods[i], 2);
+				}
+			}
+			//
+
+			for (int i = 0; i < userdata["mods_installed"].size(); i++)
+				if (userdata["mods_installed"][i]["name"] == mod.name)
+					userdata["mods_installed"][i]["active"] = false;
+			saveuserdata();
+			modmenu_move(0);
+
+			remove(filedest);
+			break;
+	}
+}
+
 void render() {
 	window.clear(color_bg);
 
@@ -853,84 +1017,7 @@ void update(float secondsPassed) {
 						render();
 
 
-						path filedest(aumoddedpath + "/BepInEx/plugins/" + mod.name + ".dll");
-						switch (availableInstallerAction) {
-							case 0: {
-								if (!starts_with(mod.file, "https://")) {
-									string t = mod.name + " " + mod.versionname + " - by " + mod.author;
-									MessageBox(NULL, L"Download link missing!", wstring(t.begin(), t.end()).c_str(), MB_ICONERROR);
-									modmenu_move(0);
-									return;
-								}
-								string filepath = filedest.string();
-								download(mod.file, filepath);
-
-								for (int o = 0; o < userdata["mods_installed"].size(); o++)
-									if (userdata["mods_installed"][o]["name"] == mod.name) {
-										userdata["mods_installed"][o]["active"] = true;
-										saveuserdata();
-										modmenu_move(0);
-										return;
-									}
-
-								int i = userdata["mods_installed"].size();
-								userdata["mods_installed"][i]["name"] = mod.name;
-								userdata["mods_installed"][i]["last_version"] = mod.version;
-								userdata["mods_installed"][i]["last_versionname"] = mod.versionname;
-								userdata["mods_installed"][i]["active"] = true;
-								saveuserdata();
-								modmenu_move(0);
-
-							}
-								break;
-							case 1: {
-								if (!starts_with(mod.file, "https://")) {
-									string t = mod.name + " " + mod.versionname + " - by " + mod.author;
-									MessageBox(NULL, L"Download link missing!", wstring(t.begin(), t.end()).c_str(), MB_ICONERROR);
-									modmenu_move(0);
-									return;
-								}
-								int i = userdata["mods_installed"].size();
-
-								for (int o = 0; o < userdata["mods_installed"].size(); o++)
-									if (userdata["mods_installed"][o]["name"] == mod.name) {
-										cout << "found ur mod\n";
-										i = o;
-									}
-
-								userdata["mods_installed"][i]["name"] = mod.name;
-								userdata["mods_installed"][i]["last_version"] = mod.version;
-								userdata["mods_installed"][i]["last_versionname"] = mod.versionname;
-								userdata["mods_installed"][i]["active"] = true;
-								saveuserdata();
-								modmenu_move(0);
-
-								string filepath = filedest.string();
-								download(mod.file, filepath);
-							}
-								  break;
-							case 2:
-								if (!exists(filedest)) {
-									string t = mod.name + " " + mod.versionname + " - by " + mod.author;
-									MessageBox(NULL, L"Mod DLL missing!", wstring(t.begin(), t.end()).c_str(), MB_ICONERROR);
-
-									for (int i = 0; i < userdata["mods_installed"].size(); i++)
-										if (userdata["mods_installed"][i]["name"] == mod.name)
-											userdata["mods_installed"][i]["active"] = false;
-									saveuserdata();
-									modmenu_move(0);
-									return;
-								}
-
-								for (int i = 0; i < userdata["mods_installed"].size(); i++)
-									if (userdata["mods_installed"][i]["name"] == mod.name)
-										userdata["mods_installed"][i]["active"] = false;
-								saveuserdata();
-								modmenu_move(0);
-
-								remove(filedest);
-								break;
-						}
+						downloadmod(mod, availableInstallerAction);
 						return;
 					}
 					if (hov_issues) {
