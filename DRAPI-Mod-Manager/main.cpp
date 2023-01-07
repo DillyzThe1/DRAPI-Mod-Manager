@@ -199,6 +199,10 @@ void reposscene() {
 			modmenu_issues.setPosition(centx + 200 - 100, height - 130);
 
 			modmenu_sourcecode.setPosition(centx - 100, height - 75);
+
+
+			modmenu_left.setPosition(50, height - 45 - 67);
+			modmenu_right.setPosition(width - 117, height - 45 - 67);
 			break;
 		case Progress:
 			break;
@@ -510,6 +514,12 @@ void scenesetup_modmenu() {
 	modmenu_sourcecode.setTexture(modmenu_buttontex);
 	modmenu_sourcecode.setTextureRect(IntRect(0, 88, 192, 50));
 
+	modmenu_left.setTexture(modmenu_buttontex);
+	modmenu_left.setTextureRect(IntRect(0, 146, 67, 67));
+
+	modmenu_right.setTexture(modmenu_buttontex);
+	modmenu_right.setTextureRect(IntRect(75, 146, 67, 67));
+
 	reposscene();
 }
 
@@ -556,6 +566,9 @@ void render() {
 		window.draw(modmenu_install);
 		window.draw(modmenu_issues);
 		window.draw(modmenu_sourcecode);
+
+		window.draw(modmenu_left);
+		window.draw(modmenu_right);
 		break;
 	case Progress:
 		break;
