@@ -301,6 +301,14 @@ void loadappdatapath() {
 	userdatapath = path::path(appdatapath + "\\userdata.json");
 }
 
+void showannouncement() {
+	string title = (string)announcementjson["title"] + " (by " + (string)announcementjson["author"] + " on " + (string)announcementjson["date"] + ")";
+	string pranked = announcementjson["text"];
+	userdata["last_announcement"] = announcementjson["version"];
+	saveuserdata();
+	MessageBox(NULL, wstring(pranked.begin(), pranked.end()).c_str(), wstring(title.begin(), title.end()).c_str(), MB_ICONINFORMATION);
+}
+
 bool downloaddata() {
 	//cout << "We should download \"" << launcherdatalink << "\" to file \"" << ldp_wstr << "\".\n";
 	bool bConnect = InternetCheckConnection(L"https://www.google.com/", FLAG_ICC_FORCE_CONNECTION, 0);
@@ -339,7 +347,6 @@ bool downloaddata() {
 		//else
 		//	cout << banner << " doesn't start with https://\n";
 	}
-
 	return true;
 }
 
@@ -408,6 +415,34 @@ void switchstate(StateType newstate) {
 	reposscene();
 }
 
+void render() {
+	window.clear(color_bg);
+
+	switch (curState) {
+	case Main:
+		if (!mm_setup)
+			return;
+
+		window.draw(mm_logo);
+
+		window.draw(mm_button_launch);
+		window.draw(mm_button_mods);
+		window.draw(mm_button_reinstall);
+		window.draw(mm_button_howtomod);
+
+		for (int i = 0; i < mbcount; i++)
+			window.draw(minibuttons[i]);
+		break;
+	case Mods:
+		break;
+	case Progress:
+		break;
+	}
+
+	window.draw(verstext);
+	window.display();
+}
+
 string wikilink = "https://github.com/DillyzThe1/DillyzRoleApi-Rewritten/wiki";
 bool prevpressed = false;
 long lastCpuTime = 0;
@@ -455,7 +490,7 @@ void update(float secondsPassed) {
 					sfx_select.play();
 					switch (i) {
 						case 0:
-							cout << "Display announcement.\n";
+							showannouncement();
 							break;
 						case 1:
 							cout << "Display settings.\n";
@@ -469,6 +504,9 @@ void update(float secondsPassed) {
 								userdata = json::parse(userdata_stream);
 								userdata_stream.close();
 								launchdisabled = modsdisabled = howtodisabled = !userdata["setup_properly"];
+
+								if (userdata["last_announcement"] != announcementjson["version"])
+									showannouncement();
 							}
 							break;
 						case 4:
@@ -495,6 +533,17 @@ void update(float secondsPassed) {
 				}
 				if (hov_reinstall) {
 					cooldown = 1.5;
+
+					// GRAY THE BUTTONS OUT
+					mm_button_launch.setColor(color_deselected);
+					mm_button_mods.setColor(color_deselected);
+					mm_button_reinstall.setColor(color_deselected);
+					mm_button_howtomod.setColor(color_deselected);
+					for (int i = 0; i < mbcount; i++)
+						minibuttons[i].setColor(color_deselected);
+					render();
+					//
+
 					sfx_select.play();
 					sfx_appear.play();
 					installingnow = true;
@@ -507,6 +556,7 @@ void update(float secondsPassed) {
 					launchdisabled = modsdisabled = howtodisabled = !userdata["setup_properly"];
 					installingnow = false;
 					sfx_disappear.play();
+					cooldown = 1.5;
 					return;
 				}
 				if (hov_howtomod) {
@@ -527,34 +577,6 @@ void update(float secondsPassed) {
 			break;
 	}
 	prevpressed = pressing;
-}
-
-void render() {
-	window.clear(color_bg);
-
-	switch (curState) {
-		case Main:
-			if (!mm_setup)
-				return;
-
-			window.draw(mm_logo);
-
-			window.draw(mm_button_launch);
-			window.draw(mm_button_mods);
-			window.draw(mm_button_reinstall);
-			window.draw(mm_button_howtomod);
-
-			for (int i = 0; i < mbcount; i++)
-				window.draw(minibuttons[i]);
-			break;
-		case Mods:
-			break;
-		case Progress:
-			break;
-	}
-
-	window.draw(verstext);
-	window.display();
 }
 
 // this function will check if you're downloading/copying/installing anything and then close the window if not
@@ -623,6 +645,9 @@ int main() {
 	//
 
 	MessageBox(NULL, L"This program is unfinished, but hello anyway!\nBinds:\n- S to switch to Setup.\n- E to locate EXE.\n- A to download files.\n- O to open your LocalLow folder.\n\nYou only need to hit S once & other binds require an S press.\nOk bye!", titlebutgoofy, MB_ICONINFORMATION);
+
+	if (userdata["last_announcement"] != announcementjson["version"])
+		showannouncement();
 
 	switchstate(Main);
 	while (window.isOpen()) {
