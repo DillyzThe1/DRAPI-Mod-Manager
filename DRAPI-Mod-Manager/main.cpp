@@ -760,7 +760,9 @@ void update(float secondsPassed) {
 						modmenu_right.setColor(color_deselected);
 						render();
 
+						sfx_appear.play();
 						MessageBox(NULL, wstring(mod.description.begin(), mod.description.end()).c_str(), wstring(t.begin(), t.end()).c_str(), MB_ICONINFORMATION);
+						sfx_disappear.play();
 						return;
 					}
 					if (hov_install) {
@@ -772,12 +774,14 @@ void update(float secondsPassed) {
 						cooldown = 1.5;
 						sfx_select.play();
 						string funnies = mod.source + "/issues/new";
+						sfx_appear.play();
 						ShellExecuteA(NULL, "open", funnies.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 						return;
 					}
 					if (hov_sourcecode) {
 						cooldown = 1.5;
 						sfx_select.play();
+						sfx_appear.play();
 						ShellExecuteA(NULL, "open", mod.source.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 						return;
 					}
