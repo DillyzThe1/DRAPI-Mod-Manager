@@ -33,7 +33,7 @@ enum StateType {
 Color color_bg(15, 10, 25, 255), color_white(255, 255, 255, 255), color_selected(0, 255, 0, 255), color_deselected(128, 128, 128, 255);
 StateType curState = None;
 
-string launcherdataURL = "https://cdn.discordapp.com/attachments/896488124107067422/1061335450305962014/launcher_latest.json";
+string launcherdataURL = "https://cdn.discordapp.com/attachments/849292573230104576/1061398094484353107/launcher_latest.json";
 string announcmentdataURL = "https://cdn.discordapp.com/attachments/849292573230104576/1060820994429812736/announcement.json";
 
 string appdatapath, aupath, aumoddedpath, launcherdatapath, announcmentsdatapath, bepinexzippath;
