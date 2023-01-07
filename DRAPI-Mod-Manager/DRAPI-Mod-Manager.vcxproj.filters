@@ -86,6 +86,12 @@
     <CopyFileToFolders Include="content\audio\task_Complete.ogg">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="content\fonts\LICENSE.txt">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
+    <CopyFileToFolders Include="content\fonts\Roboto-Regular.ttf">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tinyfiledialogs.h">

@@ -42,6 +42,7 @@ json launcherjson, announcementjson;
 path userdatapath;
 
 const int launcherversion = 0;
+const string launcherversionname = "2023.1.7";
 json userdata = {
 	{"last_announcement", -1},
 	{"last_bepinex", -1},
@@ -77,6 +78,9 @@ Vector2i getMousePos() {
 
 sf::SoundBuffer sb_hover, sb_select, sb_complete, sb_progress, sb_appear, sb_disappear;
 sf::Sound sfx_hover, sfx_select, sfx_complete, sfx_progress, sfx_appear, sfx_disappear;
+
+Font font_ui;
+Text verstext;
 
 // SETUP SCENE VARS
 // TITLE SCENE VARS
@@ -487,6 +491,7 @@ void render() {
 			break;
 	}
 
+	window.draw(verstext);
 	window.display();
 }
 
@@ -544,6 +549,13 @@ int main() {
 	sb_disappear.loadFromFile("content/audio/Panel_GenericDisappear.ogg");
 	sfx_disappear.setBuffer(sb_disappear);
 	sfx_disappear.setVolume(50);
+	//
+	
+	// font
+	font_ui.loadFromFile("content/fonts/Roboto-Regular.ttf");
+	verstext.setFont(font_ui);
+	verstext.setPosition(Vector2f(10, 5));
+	verstext.setString("v" + launcherversionname + " (build num " + to_string(launcherversion) + ")");
 	//
 
 	MessageBox(NULL, L"This program is unfinished, but hello anyway!\nBinds:\n- S to switch to Setup.\n- E to locate EXE.\n- A to download files.\n- O to open your LocalLow folder.\n\nYou only need to hit S once & other binds require an S press.\nOk bye!", titlebutgoofy, MB_ICONINFORMATION);
