@@ -84,6 +84,7 @@ Text verstext;
 
 
 float cooldown = 1.5;
+int width = 1280, height = 720;
 
 // MAIN MENU SCENE VARS
 bool mm_setup = false;
@@ -174,17 +175,58 @@ Sprite curmodbanner;
 int curmod = 0;
 
 Text modnametext;
+
+int availableInstallerAction = 0; // 0 to install, 1 to update, 2 to uninstall
 // PROGRESS SCENE SCENE VARS
 // :sadsping:
 
+void modmenu_move(int amt) {
+	if (cooldown >= 0 || (amt < 0 && curmod < 1) || (amt > 0 && curmod >= modsactive - 1))
+		return;
 
+	curmod += amt;
+	cooldown = 0.175;
+
+	if (amt != 0)
+		sfx_select.play();
+
+	if (curmod < 0)
+		curmod = 0;
+	else if (curmod >= modsactive)
+		curmod = modsactive - 1;
+
+	modnametext.setString(mods[curmod].name);
+	modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width / 2), modbar.getPosition().y + 50 - 36);
+	curmodbanner.setTexture(modbanners[curmod]);
+
+	availableInstallerAction = 0;
+	modmenu_install.setTextureRect(installrect);
+	for (int i = 0; i < userdata["mods_installed"].size(); i++) {
+		string name = userdata["mods_installed"][i]["name"];
+		int l_version = userdata["mods_installed"][i]["last_version"];
+		string l_versionname = userdata["mods_installed"][i]["last_versionname"];
+
+		cout << name << " update #" << l_version << " vs " << mods[curmod].name << " update #" << mods[curmod].version << endl;
+		if (name != mods[curmod].name)
+			continue;
+
+		if (l_version < mods[curmod].version) {
+			availableInstallerAction = 1;
+			modmenu_install.setTextureRect(updaterect);
+			return;
+		}
+
+		availableInstallerAction = 2;
+		modmenu_install.setTextureRect(uninstallrect);
+		return;
+	}
+}
 
 string fixwstr(wstring& ogstr) {
 	string newstr(ogstr.begin(), ogstr.end());
 	return newstr;
 }
 
-int width = 1280, height = 720;
 void reposscene() {
 	float centx = width / 2, centy = height / 2;
 	switch (curState) {
@@ -202,7 +244,7 @@ void reposscene() {
 			}
 			break;
 		case Mods: {
-			curmod = 0;
+			modmenu_move(0);
 
 			curmodbanner.setPosition(centx - 1280/2, centy - 720/2);
 
@@ -216,7 +258,7 @@ void reposscene() {
 			modmenu_left.setPosition(50, height - 45 - 67);
 			modmenu_right.setPosition(width - 117, height - 45 - 67);
 
-			modbar.setScale(Vector2f(width >= 2000 ? width / 2000 : 1, 1));
+			modbar.setScale(Vector2f(width >= 2000 ? ((float)width / (float)2000) : 1, 1));
 			modbar.setPosition(0, centy + 65);
 
 			modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width / 2), modbar.getPosition().y + 50 - 36);
@@ -556,6 +598,8 @@ void switchstate(StateType newstate) {
 			break;
 		case Mods:
 			scenesetup_modmenu();
+			curmod = 0;
+			modmenu_move(0);
 			break;
 	}
 
@@ -602,22 +646,6 @@ void render() {
 
 	window.draw(verstext);
 	window.display();
-}
-
-void modmenu_move(int amt) {
-	if (cooldown >= 0 || (amt < 0 && curmod < 1) || (amt > 0 && curmod >= modsactive - 1))
-		return;
-
-	curmod += amt;
-	cooldown = 0.175;
-	sfx_select.play();
-	if (curmod < 0)
-		curmod = 0;
-	else if (curmod >= modsactive)
-		curmod = modsactive - 1;
-	modnametext.setString(mods[curmod].name);
-	modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width / 2), modbar.getPosition().y + 50 - 36);
-	curmodbanner.setTexture(modbanners[curmod]);
 }
 
 string wikilink = "https://github.com/DillyzThe1/DillyzRoleApi-Rewritten/wiki";
