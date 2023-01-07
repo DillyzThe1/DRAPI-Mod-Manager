@@ -24,8 +24,6 @@ LPCWSTR titlebutgoofy = L"DRAPI Mod Manager for Among Us";
 
 enum StateType {
 	None,     // default so i can call things
-	Setup,    // when you're setting up your new among us directory 
-	Title,    // the title screen, showing everything cool
 	Main,     // the main menu, showing the buttons and options, alongside credits and information
     Mods,     // the mods menu, where you find, install, & remove any mods you wish.
 	Progress  // the download progress screen, where you'll be until something finishes installing
@@ -119,10 +117,6 @@ int width = 1280, height = 720;
 void reposscene() {
 	float centx = width / 2, centy = height / 2;
 	switch (curState) {
-		case Setup:
-			break;
-		case Title:
-			break;
 		case Main: {
 				mm_logo.setPosition(Vector2f(centx - mm_logotex.getSize().x / 2, centy - mm_logotex.getSize().y - 25));
 
@@ -399,6 +393,7 @@ void switchstate(StateType newstate) {
 	reposscene();
 }
 
+string wikilink = "https://github.com/DillyzThe1/DillyzRoleApi-Rewritten/wiki";
 bool prevpressed = false;
 long lastCpuTime = 0;
 void update(float secondsPassed) {
@@ -406,10 +401,6 @@ void update(float secondsPassed) {
 	bool pressing = Mouse::isButtonPressed(Mouse::Left);
 	bool justpressed = prevpressed != pressing && pressing;
 	switch (curState) {
-		case Setup:
-			break;
-		case Title:
-			break;
 		case Main: {
 			bool hov_launch = !launchdisabled && hoveringSprite(mp, mm_button_launch, 192, 80);
 			if (launchdisabled || installingnow)
@@ -429,7 +420,8 @@ void update(float secondsPassed) {
 
 			if (justpressed && !installingnow) {
 				if (hov_launch) {
-					switchstate(Title);
+					string exepath = aumoddedpath + exename;
+					ShellExecuteA(NULL, "open", exepath.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 					return;
 				}
 				if (hov_mods) {
@@ -450,7 +442,8 @@ void update(float secondsPassed) {
 					return;
 				}
 				if (hov_howtomod) {
-					switchstate(Title);
+					//ShellExecuteA(NULL, "open", appdatapath.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+					ShellExecuteA(NULL, "open", wikilink.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 					return;
 				}
 			}
@@ -468,10 +461,6 @@ void render() {
 	window.clear(color_bg);
 
 	switch (curState) {
-		case Setup:
-			break;
-		case Title:
-			break;
 		case Main:
 			if (!mm_setup)
 				return;
@@ -524,7 +513,7 @@ int main() {
 
 	MessageBox(NULL, L"This program is unfinished, but hello anyway!\nBinds:\n- S to switch to Setup.\n- E to locate EXE.\n- A to download files.\n- O to open your LocalLow folder.\n\nYou only need to hit S once & other binds require an S press.\nOk bye!", titlebutgoofy, MB_ICONINFORMATION);
 
-	switchstate(Title);
+	switchstate(Main);
 	while (window.isOpen()) {
 		long curTime = clock();
 		update((float)(curTime - lastCpuTime) / (float)1000);
@@ -538,36 +527,10 @@ int main() {
 					break;
 				case Event::KeyPressed:
 					switch (curState) {
-						case Setup:
-							switch (e.key.code) {
-								case Keyboard::Escape:
-									switchstate(Title);
-									break;
-								case Keyboard::A:
-									downloaddata();
-									break;
-								case Keyboard::O:
-									ShellExecuteA(NULL, "open", appdatapath.c_str(), NULL, NULL, SW_SHOWDEFAULT);
-									break;
-							}
-							break;
-						case Title:
-							switch (e.key.code) {
-								case Keyboard::Escape:
-									close();
-									break;
-								case Keyboard::S:
-									switchstate(Setup);
-									break;
-								case Keyboard::M:
-									switchstate(Main);
-									break;
-							}
-							break;
 						case Main:
 							switch (e.key.code) {
 								case Keyboard::Escape:
-									switchstate(Title);
+									close();
 									break;
 								case Keyboard::M:
 									switchstate(Mods);
