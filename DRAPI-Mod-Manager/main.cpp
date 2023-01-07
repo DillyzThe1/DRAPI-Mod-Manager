@@ -1,5 +1,6 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <time.h>
 #include "tinyfiledialogs.h"
 #include <windows.h>
@@ -74,23 +75,8 @@ Vector2i getMousePos() {
 	return mpiw;
 }
 
-/*struct ModDependencyData {
-	string name;
-	int version;
-	string versionname;
-};
-
-struct ModData {
-	string name;
-	string file;
-	string banner;
-	string bannerhash;
-	int version;
-	string versionname;
-	string description;
-	string author;
-	list<ModDependencyData> dependencies;
-};*/
+sf::SoundBuffer sb_hover, sb_select, sb_complete, sb_progress, sb_appear, sb_disappear;
+sf::Sound sfx_hover, sfx_select, sfx_complete, sfx_progress, sfx_appear, sfx_disappear;
 
 // SETUP SCENE VARS
 // TITLE SCENE VARS
@@ -101,6 +87,7 @@ Sprite mm_logo;
 Sprite mm_button_launch, mm_button_mods, mm_button_reinstall, mm_button_howtomod;
 
 bool launchdisabled = false, modsdisabled = false, reinstalldisabled = false, howtodisabled = false;
+bool prevhov_launch = false, prevhov_mods = false, prevhov_reinstall = false, prevhov_howtomod = false;
 // --Sprite mm_minibutton_announcements, mm_minibutton_settings, mm_minibutton_innersloth, mm_minibutton_refresh, mm_minibutton_discord;
 // MODS MENU SCENE VARS
 // PROGRESS SCENE SCENE VARS
@@ -418,35 +405,51 @@ void update(float secondsPassed) {
 			if (howtodisabled || installingnow)
 				mm_button_howtomod.setColor(color_deselected);
 
+			if ((hov_launch != prevhov_launch && hov_launch)
+				|| (hov_mods != prevhov_mods && hov_mods)
+				|| (hov_reinstall != prevhov_reinstall && hov_reinstall)
+				|| (hov_howtomod != prevhov_howtomod && hov_howtomod))
+				sfx_hover.play();
+
 			if (justpressed && !installingnow) {
 				if (hov_launch) {
+					sfx_select.play();
 					string exepath = aumoddedpath + exename;
 					ShellExecuteA(NULL, "open", exepath.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 					return;
 				}
 				if (hov_mods) {
+					sfx_select.play();
 					switchstate(Mods);
 					return;
 				}
 				if (hov_reinstall) {
+					sfx_select.play();
+					sfx_appear.play();
 					try {
 						installingnow = true;
 						bool exefound = locateexe();
 						cout << "Exe " << (exefound == 1 ? "properly" : "improperly") << " found.\n";
+						sfx_complete.play();
 					}
 					catch (exception e) {
 						cout << "Could not properly setup Among Us directory! Reason: " << e.what() << ".\n";
+						sfx_progress.play();
 					}
 					launchdisabled = modsdisabled = howtodisabled = !userdata["setup_properly"];
 					installingnow = false;
+					sfx_disappear.play();
 					return;
 				}
 				if (hov_howtomod) {
+					sfx_select.play();
 					//ShellExecuteA(NULL, "open", appdatapath.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 					ShellExecuteA(NULL, "open", wikilink.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 					return;
 				}
 			}
+
+			prevhov_launch = hov_launch, prevhov_mods = hov_mods, prevhov_reinstall = hov_reinstall, prevhov_howtomod = hov_howtomod;
 		}
 			break;
 		case Mods:
@@ -510,6 +513,32 @@ int main() {
 	}
 
 	launchdisabled = modsdisabled = howtodisabled = !userdata["setup_properly"];
+
+	// load sounds
+	sb_hover.loadFromFile("content/audio/UI_Hover.ogg");
+	sfx_hover.setBuffer(sb_hover);
+	sfx_hover.setVolume(50);
+
+	sb_select.loadFromFile("content/audio/UI_Select.ogg");
+	sfx_select.setBuffer(sb_select);
+	sfx_select.setVolume(50);
+
+	sb_complete.loadFromFile("content/audio/task_Complete.ogg");
+	sfx_complete.setBuffer(sb_complete);
+	sfx_complete.setVolume(50);
+
+	sb_progress.loadFromFile("content/audio/task_Inprogress.ogg");
+	sfx_progress.setBuffer(sb_progress);
+	sfx_progress.setVolume(50);
+
+	sb_appear.loadFromFile("content/audio/Panel_GenericAppear.ogg");
+	sfx_appear.setBuffer(sb_appear);
+	sfx_appear.setVolume(50);
+
+	sb_disappear.loadFromFile("content/audio/Panel_GenericDisappear.ogg");
+	sfx_disappear.setBuffer(sb_disappear);
+	sfx_disappear.setVolume(50);
+	//
 
 	MessageBox(NULL, L"This program is unfinished, but hello anyway!\nBinds:\n- S to switch to Setup.\n- E to locate EXE.\n- A to download files.\n- O to open your LocalLow folder.\n\nYou only need to hit S once & other binds require an S press.\nOk bye!", titlebutgoofy, MB_ICONINFORMATION);
 
