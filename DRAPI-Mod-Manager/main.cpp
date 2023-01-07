@@ -31,7 +31,7 @@ enum StateType {
 	Progress  // the download progress screen, where you'll be until something finishes installing
 };
 
-Color color_bg(15, 10, 25, 255), color_white(255, 255, 255, 255), color_selected(0, 255, 0, 255);
+Color color_bg(15, 10, 25, 255), color_white(255, 255, 255, 255), color_selected(0, 255, 0, 255), color_deselected(128, 128, 128, 255);
 StateType curState = None;
 
 string launcherdataURL = "https://cdn.discordapp.com/attachments/849292573230104576/1060836092003225681/launcher_latest.json";
@@ -47,6 +47,7 @@ json userdata = {
 	{"last_announcement", -1},
 	{"last_bepinex", -1},
 	{"last_auversion", "1970.1.1"},
+	{"setup_properly", false},
 	{"mods_installed", {
 		{
 			{"name", "DillyzRoleApi"},
@@ -100,6 +101,8 @@ bool mm_setup = false;
 Texture mm_buttontex, mm_logotex;
 Sprite mm_logo;
 Sprite mm_button_launch, mm_button_mods, mm_button_reinstall, mm_button_howtomod;
+
+bool launchdisabled = false, modsdisabled = false, reinstalldisabled = false, howtodisabled = false;
 // --Sprite mm_minibutton_announcements, mm_minibutton_settings, mm_minibutton_innersloth, mm_minibutton_refresh, mm_minibutton_discord;
 // MODS MENU SCENE VARS
 // PROGRESS SCENE SCENE VARS
@@ -192,9 +195,11 @@ bool download(string& link, string& file) {
 	return true;
 }
 
+bool installingnow = false;
 const string exename = "Among Us.exe";
 char const* AmongUsExeFilter[1] = { exename.c_str() };
 bool locateexe() {
+	userdata["setup_properly"] = false;
 	string funny = tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
 	cout << "File Opened: " << funny << "\n";
 	if (ends_with(funny, exename)) {
@@ -255,6 +260,7 @@ bool locateexe() {
 		// modify user data
 		userdata["last_bepinex"] = launcherjson["bepinex_vers"];
 		userdata["last_auversion"] = launcherjson["auvers"];
+		userdata["setup_properly"] = true;
 		saveuserdata();
 		return true;
 	}
@@ -321,6 +327,11 @@ bool downloaddata() {
 		string funnyname = launcherjson["mods"][i]["name"];
 		string banner = launcherjson["mods"][i]["banner"];
 		string top10logic = bannerspath + "\\" + funnyname + ".png";
+
+		// don't redownload a pre-existing banner
+		if (exists(top10logic))
+			continue;
+
 		//cout << "mdddod " << funnyname << " - " << banner << " - " << top10logic << endl;
 		if (starts_with(banner, "https://"))
 			download(banner, top10logic);
@@ -400,11 +411,23 @@ void update(float secondsPassed) {
 		case Title:
 			break;
 		case Main: {
-			bool hov_launch = hoveringSprite(mp, mm_button_launch, 192, 80);
-			bool hov_mods = hoveringSprite(mp, mm_button_mods, 192, 80);
-			bool hov_reinstall = hoveringSprite(mp, mm_button_reinstall, 192, 50);
-			bool hov_howtomod = hoveringSprite(mp, mm_button_howtomod, 192, 50);
-			if (justpressed) {
+			bool hov_launch = !launchdisabled && hoveringSprite(mp, mm_button_launch, 192, 80);
+			if (launchdisabled || installingnow)
+				mm_button_launch.setColor(color_deselected);
+
+			bool hov_mods = !modsdisabled && hoveringSprite(mp, mm_button_mods, 192, 80);
+			if (modsdisabled || installingnow)
+				mm_button_mods.setColor(color_deselected);
+
+			bool hov_reinstall = !reinstalldisabled && hoveringSprite(mp, mm_button_reinstall, 192, 50);
+			if (reinstalldisabled || installingnow)
+				mm_button_reinstall.setColor(color_deselected);
+
+			bool hov_howtomod = !howtodisabled && hoveringSprite(mp, mm_button_howtomod, 192, 50);
+			if (howtodisabled || installingnow)
+				mm_button_howtomod.setColor(color_deselected);
+
+			if (justpressed && !installingnow) {
 				if (hov_launch) {
 					switchstate(Title);
 					return;
@@ -414,7 +437,16 @@ void update(float secondsPassed) {
 					return;
 				}
 				if (hov_reinstall) {
-					switchstate(Title);
+					try {
+						installingnow = true;
+						bool exefound = locateexe();
+						cout << "Exe " << (exefound == 1 ? "properly" : "improperly") << " found.\n";
+					}
+					catch (exception e) {
+						cout << "Could not properly setup Among Us directory! Reason: " << e.what() << ".\n";
+					}
+					launchdisabled = modsdisabled = howtodisabled = !userdata["setup_properly"];
+					installingnow = false;
 					return;
 				}
 				if (hov_howtomod) {
@@ -482,6 +514,13 @@ int main() {
 	// make defaults just incase
 	if (!exists(userdatapath))
 		saveuserdata();
+	else {
+		ifstream userdata_stream(userdatapath.string());
+		userdata = json::parse(userdata_stream);
+		userdata_stream.close();
+	}
+
+	launchdisabled = modsdisabled = howtodisabled = !userdata["setup_properly"];
 
 	MessageBox(NULL, L"This program is unfinished, but hello anyway!\nBinds:\n- S to switch to Setup.\n- E to locate EXE.\n- A to download files.\n- O to open your LocalLow folder.\n\nYou only need to hit S once & other binds require an S press.\nOk bye!", titlebutgoofy, MB_ICONINFORMATION);
 
@@ -503,16 +542,6 @@ int main() {
 							switch (e.key.code) {
 								case Keyboard::Escape:
 									switchstate(Title);
-									break;
-								case Keyboard::E: {
-										try {
-											bool exefound = locateexe();
-											cout << "Exe " << (exefound == 1 ? "properly" : "improperly") << " found.\n";
-										}
-										catch (exception e) {
-											cout << "Could not properly setup Among Us directory! Reason: " << e.what() << ".\n";
-										}
-									}
 									break;
 								case Keyboard::A:
 									downloaddata();
