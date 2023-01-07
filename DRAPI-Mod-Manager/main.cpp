@@ -752,6 +752,14 @@ void update(float secondsPassed) {
 						cooldown = 1.5;
 						sfx_select.play();
 						string t = mod.name + " " + mod.versionname + " - by " + mod.author;
+
+						modmenu_install.setColor(color_deselected);
+						modmenu_issues.setColor(color_deselected);
+						modmenu_sourcecode.setColor(color_deselected);
+						modmenu_left.setColor(color_deselected);
+						modmenu_right.setColor(color_deselected);
+						render();
+
 						MessageBox(NULL, wstring(mod.description.begin(), mod.description.end()).c_str(), wstring(t.begin(), t.end()).c_str(), MB_ICONINFORMATION);
 						return;
 					}
@@ -763,6 +771,8 @@ void update(float secondsPassed) {
 					if (hov_issues) {
 						cooldown = 1.5;
 						sfx_select.play();
+						string funnies = mod.source + "/issues/new";
+						ShellExecuteA(NULL, "open", funnies.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 						return;
 					}
 					if (hov_sourcecode) {
