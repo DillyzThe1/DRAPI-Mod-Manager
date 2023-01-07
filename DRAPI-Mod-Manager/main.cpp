@@ -122,7 +122,7 @@ void reposscene() {
 				mm_button_howtomod.setPosition(Vector2f(centx + 100 + offset, centy + 90));
 
 				for (int i = 0; i < mbcount; i++)
-					minibuttons[i].setPosition(centx - ((float)67 / (float)2) + (((float)i*2 - (float)mbcount) + 1) * 50, centy + 180);
+					minibuttons[i].setPosition(centx - ((float)67 / (float)2) + (((float)i*2 - (float)mbcount) + 1) * 50, centy + 160);
 			}
 			break;
 		case Mods:
