@@ -92,6 +92,9 @@
     <CopyFileToFolders Include="content\fonts\Roboto-Regular.ttf">
       <Filter>Resource Files</Filter>
     </CopyFileToFolders>
+    <CopyFileToFolders Include="content\graphics\mod-buttons.png">
+      <Filter>Resource Files</Filter>
+    </CopyFileToFolders>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tinyfiledialogs.h">

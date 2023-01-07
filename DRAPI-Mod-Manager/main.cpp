@@ -82,6 +82,9 @@ sf::Sound sfx_hover, sfx_select, sfx_complete, sfx_progress, sfx_appear, sfx_dis
 Font font_ui;
 Text verstext;
 
+
+float cooldown = 1.5;
+
 // MAIN MENU SCENE VARS
 bool mm_setup = false;
 Texture mm_buttontex, mm_logotex;
@@ -95,9 +98,74 @@ Sprite minibuttons[mbcount];
 bool launchdisabled = false, modsdisabled = false, reinstalldisabled = false, howtodisabled = false;
 bool prevhov_launch = false, prevhov_mods = false, prevhov_reinstall = false, prevhov_howtomod = false;
 string innerslothlink = "https://www.innersloth.com/", discordlink = "https://discord.gg/49NFTwcYgZ";
-
-float cooldown = 1.5;
 // MODS MENU SCENE VARS
+Texture modmenu_buttontex;
+bool modmenu_setup = false;
+Sprite modmenu_about, modmenu_install, modmenu_issues, modmenu_sourcecode;
+Sprite modmenu_left, modmenu_right;
+bool prevhov_about = false, prevhov_install = false, prevhov_issues = false, prevhov_sourcecode = false, prevhov_left = false, prevhov_right = false;
+
+IntRect installrect(0, 0, 192, 80), updaterect(200, 0, 192, 80), uninstallrect(400, 0, 192, 80);
+
+struct ModDependencyData {
+	string name;
+	int version;
+	string versionname;
+
+	ModDependencyData() {
+		this->name = "blank";
+	}
+
+	ModDependencyData(string _name, int _version, string _versionname) {
+		this->name = _name;
+		this->version = _version;
+		this->versionname = _versionname;
+	}
+};
+
+ModDependencyData dependencyfrom(string _name, int _version, string _versionname) {
+	ModDependencyData funny(_name, _version, _versionname);
+	return funny;
+}
+
+struct ModData {
+	string name;
+	string file;
+	string banner;
+	string bannerhash;
+	int version;
+	string versionname;
+	string description;
+	string author;
+
+	int dependencycount = 0;
+	ModDependencyData dependencies[10];
+
+	ModData() {
+		this->name = "blank";
+	}
+
+	ModData(string _name, string _file, string _banner, string _bh, int _version, string _vn, string _description, string _author) {
+		this->name = _name;
+		this->file = _file;
+		this->banner = _banner;
+		this->bannerhash = _bh;
+		this->version = _version;
+		this->versionname = _vn;
+		this->description = _description;
+		this->author = _author;
+	}
+
+	void AddDependency(ModDependencyData d) {
+		dependencies[dependencycount] = d;
+		dependencycount++;
+	}
+};
+
+int modsactive = 0;
+ModData mods[1000];
+
+int curmod = 0;
 // PROGRESS SCENE SCENE VARS
 // :sadsping:
 
@@ -126,6 +194,11 @@ void reposscene() {
 			}
 			break;
 		case Mods:
+			modmenu_about.setPosition(centx - 200 - 100, height - 130);
+			modmenu_install.setPosition(centx - 100, height - 160);
+			modmenu_issues.setPosition(centx + 200 - 100, height - 130);
+
+			modmenu_sourcecode.setPosition(centx - 100, height - 75);
 			break;
 		case Progress:
 			break;
@@ -332,6 +405,8 @@ bool downloaddata() {
 	string bannerspath = appdatapath + "\\banners";
 	create_directory(bannerspath);
 
+	modsactive = 0;
+
 	cout << "mods list has " << launcherjson["mods"].size() << " mods\n";
 
 	for (int i = 0; i < launcherjson["mods"].size(); i++) {
@@ -339,6 +414,18 @@ bool downloaddata() {
 		string funnyname = launcherjson["mods"][i]["name"];
 		string banner = launcherjson["mods"][i]["banner"];
 		string top10logic = bannerspath + "\\" + funnyname + ".png";
+
+		modsactive++;
+
+		ModData mod(funnyname, launcherjson["mods"][i]["file"], banner, launcherjson["mods"][i]["bannerhash"], launcherjson["mods"][i]["version"],
+			launcherjson["mods"][i]["versionname"], launcherjson["mods"][i]["description"], launcherjson["mods"][i]["author"]);
+		mods[i] = mod;
+
+		for (int o = 0; o < launcherjson["mods"][i]["dependencies"].size(); o++) {
+			ModDependencyData dependency(launcherjson["mods"][i]["dependencies"][0]["name"],
+				launcherjson["mods"][i]["dependencies"][0]["version"], launcherjson["mods"][i]["dependencies"][0]["versionname"]);
+			mods[i].AddDependency(dependency);
+		}
 
 		// don't redownload a pre-existing banner
 		if (exists(top10logic))
@@ -404,6 +491,28 @@ void scenesetup_mainmenu() {
 	reposscene();
 }
 
+void scenesetup_modmenu() {
+	if (modmenu_setup)
+		return;
+	modmenu_setup = true;
+
+	modmenu_buttontex.loadFromFile("content/graphics/mod-buttons.png");
+
+	modmenu_about.setTexture(modmenu_buttontex);
+	modmenu_about.setTextureRect(IntRect(600, 0, 192, 80));
+
+	modmenu_install.setTexture(modmenu_buttontex);
+	modmenu_install.setTextureRect(installrect);
+
+	modmenu_issues.setTexture(modmenu_buttontex);
+	modmenu_issues.setTextureRect(IntRect(800, 0, 192, 80));
+
+	modmenu_sourcecode.setTexture(modmenu_buttontex);
+	modmenu_sourcecode.setTextureRect(IntRect(0, 88, 192, 50));
+
+	reposscene();
+}
+
 void switchstate(StateType newstate) {
 	cout << "New state " << newstate << " found.\n";
 	StateType oldState = curState;
@@ -412,6 +521,9 @@ void switchstate(StateType newstate) {
 	switch (newstate) {
 		case Main:
 			scenesetup_mainmenu();
+			break;
+		case Mods:
+			scenesetup_modmenu();
 			break;
 	}
 
@@ -437,6 +549,13 @@ void render() {
 			window.draw(minibuttons[i]);
 		break;
 	case Mods:
+		if (!modmenu_setup)
+			return;
+
+		window.draw(modmenu_about);
+		window.draw(modmenu_install);
+		window.draw(modmenu_issues);
+		window.draw(modmenu_sourcecode);
 		break;
 	case Progress:
 		break;
@@ -577,6 +696,7 @@ void update(float secondsPassed) {
 		}
 			break;
 		case Mods:
+
 			break;
 		case Progress:
 			break;
