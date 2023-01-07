@@ -556,6 +556,8 @@ int main() {
 	verstext.setFont(font_ui);
 	verstext.setPosition(Vector2f(10, 5));
 	verstext.setString("v" + launcherversionname + " (build num " + to_string(launcherversion) + ")");
+	verstext.setOutlineColor(Color::Black);
+	verstext.setOutlineThickness(2);
 	//
 
 	MessageBox(NULL, L"This program is unfinished, but hello anyway!\nBinds:\n- S to switch to Setup.\n- E to locate EXE.\n- A to download files.\n- O to open your LocalLow folder.\n\nYou only need to hit S once & other binds require an S press.\nOk bye!", titlebutgoofy, MB_ICONINFORMATION);
