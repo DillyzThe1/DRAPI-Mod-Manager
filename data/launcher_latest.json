@@ -53,6 +53,24 @@
 					"versionname": "v2.1.0-dev"
 				}
 			]
+		},
+		{
+			"name": "Impostor Pipebombs",
+			"file": "https://cdn.discordapp.com/attachments/807081464894062612/1061452055488766063/PipebombMod.dll",
+			"banner": "https://raw.githubusercontent.com/DillyzThe1/DRAPI-Mod-Manager/main/data/banners/pipebomb.png",
+			"source": "https://github.com/impostor5875/PipebombMod",
+			"bannerhash": "c2df61ec7ca1d7f7f2c864ead4182400",
+			"version": 0,
+			"versionname": "v1.0.0-dev",
+			"description": "Gives the impostors the ability to place pipebombs & hide them in vents! Disables the kill button.",
+			"author": "Impostor5875",
+			"dependencies": [
+				{
+					"name": "DillyzRoleApi",
+					"version": 0,
+					"versionname": "v2.1.0-dev"
+				}
+			]
 		}
 	]
 }
