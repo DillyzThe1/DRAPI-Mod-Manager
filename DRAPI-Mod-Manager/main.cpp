@@ -41,7 +41,7 @@ json launcherjson, announcementjson;
 
 path userdatapath;
 
-const int launcherversion = 0;
+const int launcherversion = 72;
 const string launcherversionname = "2023.1.7";
 json userdata = {
 	{"last_announcement", -1},
