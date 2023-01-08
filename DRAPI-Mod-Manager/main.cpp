@@ -673,6 +673,8 @@ void downloadmod(ModData mod, int action) {
 
 			for (int o = 0; o < userdata["mods_installed"].size(); o++)
 				if (userdata["mods_installed"][o]["name"] == mod.name) {
+					userdata["mods_installed"][o]["last_version"] = mod.version;
+					userdata["mods_installed"][o]["last_versionname"] = mod.versionname;
 					userdata["mods_installed"][o]["active"] = true;
 					saveuserdata();
 					modmenu_move(0);
