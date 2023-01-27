@@ -1,11 +1,12 @@
 {
 	"version": 100,
-	"launcherversion": "2023.5.9",
+	"launcherversion": "2023.1.27",
 	"launcherdownloads": "https://github.com/DillyzThe1/DRAPI-Mod-Manager/releases/latest/",
 	"bepinex_vers": 0,
 	"bepinex": "https://builds.bepinex.dev/projects/bepinex_be/577/BepInEx_UnityIL2CPP_x86_ec79ad0_6.0.0-be.577.zip",
-	"auvers": "2022.12.14",
-	"auhash": "908fe1e7366c7e7d44d385c0e47fad50",
+	"amongus": 2640,
+	"amongusversion": "2022.12.14",
+	"amongus_exehash": "908fe1e7366c7e7d44d385c0e47fad50",
 	"mods": [
 		{
 			"name": "DillyzRoleApi",
