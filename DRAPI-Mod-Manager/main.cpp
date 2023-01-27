@@ -102,7 +102,7 @@ enum MiniButtonID {
 };
 
 const MiniButtonID mbids[] = {Announcements, Settings, Innersloth, Refresh, Discord};
-const int mbrect_x[] = {0,               75,         150,          225,       300};
+const int mbrect_x[] =       {0,             75,       150,        225,     300};
 const int mbcount = (sizeof(mbids) / sizeof(*mbids));
 bool mbprevhold[mbcount];
 Sprite minibuttons[mbcount];
