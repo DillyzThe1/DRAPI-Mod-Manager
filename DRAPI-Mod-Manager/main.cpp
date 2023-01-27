@@ -41,11 +41,12 @@ json launcherjson, announcementjson;
 
 path userdatapath;
 
-const int launcherversion = 78;
+const int launcherversion = 79;
 const string launcherversionname = "2023.1.27";
 json userdata = {
 	{"last_announcement", -1},
 	{"last_bepinex", -1},
+	{"last_auversionnum", -1},
 	{"last_auversion", "1970.1.1"},
 	{"setup_properly", false},
 	{"mods_installed", {
@@ -213,7 +214,7 @@ void modmenu_move(int amt) {
 	modnametext.setPosition((width / 2) - (modnametext.getLocalBounds().width / 2), modbar.getPosition().y + 50 - 36);
 	curmodbanner.setTexture(modbanners[curmod]);
 
-	//cout << "getting there\n";
+	//std::cout << "getting there\n";
 	availableInstallerAction = 0;
 	modmenu_install.setTextureRect(installrect);
 	for (int i = 0; i < userdata["mods_installed"].size(); i++) {
@@ -224,7 +225,7 @@ void modmenu_move(int amt) {
 		int l_version = userdata["mods_installed"][i]["last_version"];
 		string l_versionname = userdata["mods_installed"][i]["last_versionname"];
 
-		//cout << name << " update #" << l_version << " vs " << mods[curmod].name << " update #" << mods[curmod].version << endl;
+		//std::cout << name << " update #" << l_version << " vs " << mods[curmod].name << " update #" << mods[curmod].version << endl;
 		if (name != mods[curmod].name)
 			continue;
 
@@ -308,7 +309,7 @@ bool replace(string& str, const string& from, const string& to) {
 }
 
 bool clonedir(string& from, string& to) {
-	//cout << "Copying data at " << from << " into " << to << ".\n";
+	//std::cout << "Copying data at " << from << " into " << to << ".\n";
 
 	try {
 		if (is_directory(from))
@@ -319,7 +320,7 @@ bool clonedir(string& from, string& to) {
 			for (const auto& entry : directory_iterator(from)) {
 				string name = entry.path().filename().u8string();
 				string from_ext = from + "\\" + name, to_ext = to + "\\" + name;
-				//cout << entry.path().filename().u8string() << endl;
+				//std::cout << entry.path().filename().u8string() << endl;
 				if (!clonedir(from_ext, to_ext))
 					return false;
 			}
@@ -329,7 +330,7 @@ bool clonedir(string& from, string& to) {
 		copy(from, to);
 	}
 	catch (exception e) {
-		cout << "Couldn't copy data at \"" << from << "\" to location \"" << to << "\"! Reason: " << e.what() << ".\n";
+		std::cout << "Couldn't copy data at \"" << from << "\" to location \"" << to << "\"! Reason: " << e.what() << ".\n";
 		return false;
 	}
 	return true;
@@ -341,10 +342,34 @@ bool download(string& link, string& file) {
 
 	// generate garbage data to circumvent caching
 	srand(rand() * rand() * 3.14159265359);
-	string modlink = link + "?rand=" + to_string(rand());
+	string modlink = link + "?random_data=" + to_string(rand());
+
+	std::cout << "Modded link is " + modlink + "!\n";
 
 	URLDownloadToFile(NULL, wstring(modlink.begin(), modlink.end()).c_str(), wstring(file.begin(), file.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
 	return true;
+}
+
+// https://stackoverflow.com/questions/478898/how-do-i-execute-a-command-and-get-the-output-of-the-command-within-c-using-po
+string hashfile(string& path) {
+	char tmpname[L_tmpnam];
+	tmpnam_s(tmpname);
+	string scommand = "certutil -hashfile \"" + path + "\" MD5";
+	//std::cout << scommand << "\n";
+	string cmd = scommand + " >> " + tmpname;
+	system(cmd.c_str());
+	ifstream file(tmpname, ios::in | ios::binary);
+	string result;
+	if (file) {
+		while (!file.eof()) result.push_back(file.get()) ;
+		file.close();
+	}
+	remove(tmpname);
+	string toptext = "MD5 hash of " + path + ":\n";
+	result = result.substr(toptext.length(), 33);
+	string lb = "\n", blank = "";
+	replace(result, lb, blank);
+	return result;
 }
 
 bool installingnow = false;
@@ -354,7 +379,7 @@ bool locateexe() {
 	char *funny_old = tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
 
 	sfx_disappear.play();
-	//cout << "xd\n";
+	//std::cout << "xd\n";
 	if (((funny_old != NULL) && (funny_old[0] == '\0')) || funny_old == NULL)
 		return false; // it was skipped
 
@@ -366,10 +391,10 @@ bool locateexe() {
 
 	userdata["setup_properly"] = false;
 	saveuserdata();
-	cout << "File Opened: " << funny << "\n";
+	std::cout << "File Opened: " << funny << "\n";
 	if (ends_with(funny, exename)) {
 		aupath = funny.substr(0, funny.length() - exename.length());
-		cout << "Folder: " << aupath << "\n";
+		std::cout << "Folder: " << aupath << "\n";
 		remove_all(aumoddedpath);
 		create_directory(aumoddedpath);
 		clonedir(aupath, aumoddedpath);
@@ -389,7 +414,7 @@ bool locateexe() {
 		if (!mz_zip_reader_init_file(&ziparchive, dp.string().c_str(), 0))
 			return false; // failed to initiate the zip
 		const int fileamt = (int)mz_zip_reader_get_num_files(&ziparchive);
-		cout << "files found (" << fileamt << ")\n";
+		std::cout << "files found (" << fileamt << ")\n";
 		if (fileamt == 0)
 			return false; // failed to find any contents
 		mz_zip_archive_file_stat fs;
@@ -397,12 +422,12 @@ bool locateexe() {
 			mz_zip_reader_end(&ziparchive);
 			return false;
 		}
-		cout << "in the " << aumoddedpath << endl;
+		std::cout << "in the " << aumoddedpath << endl;
 		for (int i = 0; i < fileamt; i++) {
 			mz_zip_reader_file_stat(&ziparchive, i, &fs);
 			string newpath = aumoddedpath + fs.m_filename;
 			path dir(newpath);
-			//cout << "check the " << newpath << " " << dir.parent_path().string() << endl;
+			//std::cout << "check the " << newpath << " " << dir.parent_path().string() << endl;
 			string funnydir = dir.parent_path().string();
 			string top10awesome = funnydir.substr(aumoddedpath.length() - 1, funnydir.length());
 			if (top10awesome.length() != 0)
@@ -424,7 +449,8 @@ bool locateexe() {
 
 		// modify user data
 		userdata["last_bepinex"] = launcherjson["bepinex_vers"];
-		userdata["last_auversion"] = launcherjson["auvers"];
+		userdata["last_auversionnum"] = launcherjson["amongus"];
+		userdata["last_auversion"] = launcherjson["amongusversion"];
 		userdata["setup_properly"] = true;
 		saveuserdata();
 		return true;
@@ -445,7 +471,7 @@ void loadappdatapath() {
 	buffer.resize(buffersize);
 	buffersize = GetEnvironmentVariable(L"APPDATA", &buffer[0], buffersize);
 	if (!buffersize) {
-		cout << "Appdata not found.\n";
+		std::cout << "Appdata not found.\n";
 		return;
 	}
 	buffer.resize(buffersize);
@@ -456,7 +482,7 @@ void loadappdatapath() {
 	create_directory(appdatapath.substr(0, appdatapath.length() - appfolder.length()));
 	create_directory(appdatapath);
 
-	cout << "Appdata: " << appdatapath << "\n";
+	std::cout << "Appdata: " << appdatapath << "\n";
 
 	aumoddedpath = appdatapath + "\\Game\\";
 	launcherdatapath = appdatapath + "\\launcher_latest.json";
@@ -480,19 +506,22 @@ void showupdate() {
 	string newvers_dashes = launcherjson["launcherversion"];
 	replace(newvers_dashes.begin(), newvers_dashes.end(), '.', '-');
 
-	cout << "Prompting an update to v" << newvers << ".\n";
+	std::cout << "Prompting an update to v" << newvers << ".\n";
 
 	string title = (string)announcementjson["title"] + " (by " + (string)announcementjson["author"] + " on " + (string)announcementjson["date"] + ")";
 	string pranked = "Hey! It appears that you're using an outdated version of the DRAPI Mod Manager!\nYour version is v" + 
 					 launcherversionname + ", but the latest is v" + newvers + "!\nWhen the Github page opens, click DRAPIMM-Installer-" + newvers_dashes
 		             + ".exe and open it when it downloads!\nThank you for using DRAPIMM!";
 	sfx_appear.play();
-	MessageBox(NULL, wstring(pranked.begin(), pranked.end()).c_str(), L"DRAPIMM Update Alert", MB_ICONINFORMATION);
+	MessageBox(NULL, wstring(pranked.begin(), pranked.end()).c_str(), L"DRAPI Mod Manager Update Alert", MB_ICONINFORMATION);
 	sfx_disappear.play();
+
+	sfx_appear.play();
+	ShellExecuteA(NULL, "open", ((string)launcherjson["launcherdownloads"]).c_str(), NULL, NULL, SW_SHOWDEFAULT);
 }
 
 bool downloaddata() {
-	//cout << "We should download \"" << launcherdatalink << "\" to file \"" << ldp_wstr << "\".\n";
+	//std::cout << "We should download \"" << launcherdatalink << "\" to file \"" << ldp_wstr << "\".\n";
 	bool bConnect = InternetCheckConnection(L"https://www.google.com/", FLAG_ICC_FORCE_CONNECTION, 0);
 	if (!bConnect)
 		return false;
@@ -515,10 +544,10 @@ bool downloaddata() {
 
 	modsactive = 0;
 
-	cout << "mods list has " << launcherjson["mods"].size() << " mods\n";
+	std::cout << "mods list has " << launcherjson["mods"].size() << " mods\n";
 
 	for (int i = 0; i < launcherjson["mods"].size(); i++) {
-		//cout << "mod " << i << endl;
+		//std::cout << "mod " << i << endl;
 		string funnyname = launcherjson["mods"][i]["name"];
 		string banner = launcherjson["mods"][i]["banner"];
 		string top10logic = bannerspath + "\\" + funnyname + ".png";
@@ -540,7 +569,7 @@ bool downloaddata() {
 		if (!exists(top10logic) && starts_with(banner, "https://"))
 			download(banner, top10logic);
 		//else
-		//	cout << banner << " doesn't start with https://\n";
+		//	std::cout << banner << " doesn't start with https://\n";
 
 		Texture bannertex;
 		bannertex.loadFromFile(exists(top10logic) ? top10logic : "content/graphics/nobanner.png");
@@ -548,9 +577,30 @@ bool downloaddata() {
 	}
 
 	int latestversion = launcherjson["version"];
-	cout << "The current version is build " << launcherversion << ", however, the latest build is " << latestversion << ".\n";
+	std::cout << "The current version is build " << launcherversion << ", however, the latest build is " << latestversion << ".\n";
 	if (latestversion > launcherversion)
 		showupdate();
+
+	if (launcherjson["amongus"] > userdata["last_auversionnum"])
+	{
+		string title = "DRAPI Mod Manager - Version Warning";
+		string noticetext = "Hey!\nThe version of Among Us used has updated!\nYou'll have to reinstall any mods you had, but keep in mind some of them may not have updated yet!";
+		userdata["setup_properly"] = false;
+		saveuserdata();
+		sfx_appear.play();
+		MessageBox(NULL, wstring(noticetext.begin(), noticetext.end()).c_str(), wstring(title.begin(), title.end()).c_str(), MB_ICONEXCLAMATION);
+		sfx_disappear.play();
+	}
+	else if (launcherjson["bepinex_vers"] > userdata["last_bepinex"])
+	{
+		string title = "DRAPI Mod Manager - Version Warning";
+		string noticetext = "Hey!\nThe version of BepInEx used has been updated!\nYou'll need to reinstall any mods you had!";
+		userdata["setup_properly"] = false;
+		saveuserdata();
+		sfx_appear.play();
+		MessageBox(NULL, wstring(noticetext.begin(), noticetext.end()).c_str(), wstring(title.begin(), title.end()).c_str(), MB_ICONEXCLAMATION);
+		sfx_disappear.play();
+	}
 
 	return true;
 }
@@ -638,7 +688,7 @@ void scenesetup_modmenu() {
 }
 
 void switchstate(StateType newstate) {
-	cout << "New state " << newstate << " found.\n";
+	std::cout << "New state " << newstate << " found.\n";
 	StateType oldState = curState;
 	curState = newstate;
 
@@ -660,7 +710,7 @@ void switchstate(StateType newstate) {
 }
 
 void downloadmod(ModData mod, int action) {
-	cout << "Modifying " << mod.name << " " << mod.versionname << endl;
+	std::cout << "Modifying " << mod.name << " " << mod.versionname << endl;
 	path filedest(aumoddedpath + "/BepInEx/plugins/" + mod.name + ".dll");
 	string popuptitle = mod.name + " " + mod.versionname + " - by " + mod.author;
 	switch (action) {
@@ -781,7 +831,7 @@ void downloadmod(ModData mod, int action) {
 
 			for (int o = 0; o < userdata["mods_installed"].size(); o++)
 				if (userdata["mods_installed"][o]["name"] == mod.name) {
-					cout << "found ur mod\n";
+					std::cout << "found ur mod\n";
 					i = o;
 				}
 
@@ -940,7 +990,7 @@ void update(float secondsPassed) {
 							showannouncement();
 							break;
 						case Settings:
-							cout << "Display settings.\n";
+							std::cout << "Display settings.\n";
 							break;
 						case Innersloth:
 							sfx_appear.play();
@@ -997,7 +1047,7 @@ void update(float secondsPassed) {
 					sfx_appear.play();
 					installingnow = true;
 					bool exefound = locateexe();
-					cout << "Exe " << (exefound == 1 ? "properly" : "improperly") << " found.\n";
+					std::cout << "Exe " << (exefound == 1 ? "properly" : "improperly") << " found.\n";
 					if (exefound)
 						sfx_complete.play();
 					else
@@ -1127,7 +1177,7 @@ void close() {
 }
 
 int main() {
-	cout << "There is a pipebomb in your mailbox.\n";
+	std::cout << "There is a pipebomb in your mailbox.\n";
 
 	window.setFramerateLimit(120);
 	window.setVerticalSyncEnabled(true);
@@ -1206,6 +1256,10 @@ int main() {
 	if (userdata["last_announcement"] != announcementjson["version"])
 		showannouncement();
 
+	std::cout << "Hash: " << hashfile(announcmentsdatapath) << ".\n";
+	if (hashfile(announcmentsdatapath) == launcherjson["amongus_exehash"])
+		std::cout << "EXE hashes match!\n";
+
 	while (window.isOpen()) {
 		long curTime = clock();
 		update((float)(curTime - lastCpuTime) / (float)1000);
@@ -1255,10 +1309,10 @@ int main() {
 				case Event::KeyReleased:
 					break;
 				case Event::Resized:
-					cout << "Resize window!\n";
+					std::cout << "Resize window!\n";
 					bool aspect_height = e.size.width > e.size.height;
 					double aspect = aspect_height ? ((double)e.size.width / e.size.height) : ((double)e.size.height / e.size.width);
-					cout << "Aspect ratio: " << aspect << " " << aspect_height << endl;
+					std::cout << "Aspect ratio: " << aspect << " " << aspect_height << endl;
 					vz = FloatRect(0, 0, aspect_height ? (720 * aspect) : 1280, aspect_height ? 720 : (1280 * aspect));
 					window.setView(View(vz));
 					width = vz.width;
