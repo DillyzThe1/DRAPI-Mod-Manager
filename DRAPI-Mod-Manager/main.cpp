@@ -41,7 +41,7 @@ json launcherjson, announcementjson;
 
 path userdatapath;
 
-const int launcherversion = 80;
+const int launcherversion = 81;
 const string launcherversionname = "2023.1.27";
 json userdata = {
 	{"last_announcement", -1},
@@ -1196,11 +1196,6 @@ int main() {
 	window.setIcon(200, 200, icontex.copyToImage().getPixelsPtr());
 
 	loadappdatapath();
-	if (!downloaddata()) {
-		window.close();
-		MessageBox(NULL, L"Internet access not found!", titlebutgoofy, MB_ICONERROR);
-		return 0;
-	}
 
 	// make defaults just incase
 	if (!exists(userdatapath))
@@ -1209,6 +1204,12 @@ int main() {
 		ifstream userdata_stream(userdatapath.string());
 		userdata = json::parse(userdata_stream);
 		userdata_stream.close();
+	}
+
+	if (!downloaddata()) {
+		window.close();
+		MessageBox(NULL, L"Internet access not found!", titlebutgoofy, MB_ICONERROR);
+		return 0;
 	}
 
 	launchdisabled = modsdisabled = howtodisabled = !userdata["setup_properly"];
