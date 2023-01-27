@@ -41,7 +41,7 @@ json launcherjson, announcementjson;
 
 path userdatapath;
 
-const int launcherversion = 77;
+const int launcherversion = 78;
 const string launcherversionname = "2023.1.27";
 json userdata = {
 	{"last_announcement", -1},
@@ -338,7 +338,12 @@ bool clonedir(string& from, string& to) {
 bool download(string& link, string& file) {
 	if (!starts_with(link, "https:")) // prevents crashes and insecure links
 		return false;
-	URLDownloadToFile(NULL, wstring(link.begin(), link.end()).c_str(), wstring(file.begin(), file.end()).c_str(), BINDF_NEEDFILE, NULL);
+
+	// generate garbage data to circumvent caching
+	srand(rand() * rand() * 3.14159265359);
+	string modlink = link + "?rand=" + to_string(rand());
+
+	URLDownloadToFile(NULL, wstring(modlink.begin(), modlink.end()).c_str(), wstring(file.begin(), file.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
 	return true;
 }
 
