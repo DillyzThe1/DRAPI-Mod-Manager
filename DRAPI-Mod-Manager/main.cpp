@@ -108,6 +108,8 @@ Sprite modmenu_about, modmenu_install, modmenu_issues, modmenu_sourcecode;
 Sprite modmenu_left, modmenu_right;
 bool prevhov_about = false, prevhov_install = false, prevhov_issues = false, prevhov_sourcecode = false, prevhov_left = false, prevhov_right = false;
 
+string versionstr = "v" + launcherversionname + " (build num " + to_string(launcherversion) + ")";
+
 IntRect installrect(0, 0, 192, 80), updaterect(200, 0, 192, 80), uninstallrect(400, 0, 192, 80);
 
 struct ModDependencyData {
@@ -604,14 +606,17 @@ void switchstate(StateType newstate) {
 	StateType oldState = curState;
 	curState = newstate;
 
+
 	switch (newstate) {
 		case Main:
 			scenesetup_mainmenu();
+			verstext.setString(versionstr);
 			break;
 		case Mods:
 			scenesetup_modmenu();
 			curmod = 0;
 			modmenu_move(0);
+			verstext.setString(versionstr + "\nHit escape to go back.");
 			break;
 	}
 
@@ -1144,7 +1149,7 @@ int main() {
 	font_ui.loadFromFile("content/fonts/Roboto-Regular.ttf");
 	verstext.setFont(font_ui);
 	verstext.setPosition(Vector2f(10, 5));
-	verstext.setString("v" + launcherversionname + " (build num " + to_string(launcherversion) + ")");
+	verstext.setString(versionstr);
 	verstext.setOutlineColor(Color::Black);
 	verstext.setOutlineThickness(2);
 
