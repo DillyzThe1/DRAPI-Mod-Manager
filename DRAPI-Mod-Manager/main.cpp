@@ -25,7 +25,7 @@ LPCWSTR titlebutgoofy = L"DRAPI Mod Manager for Among Us";
 
 enum StateType {
 	None,     // default so i can call things
-	Main,     // the main menu, showing the buttons and options, alongside credits and information
+	Main,     // the main menu, showing the buttons and options, alongside credits and information 
     Mods,     // the mods menu, where you find, install, & remove any mods you wish.
 	Progress  // the download progress screen, where you'll be until something finishes installing
 };
@@ -41,7 +41,7 @@ json launcherjson, announcementjson;
 
 path userdatapath;
 
-const int launcherversion = 79;
+const int launcherversion = 80;
 const string launcherversionname = "2023.1.27";
 json userdata = {
 	{"last_announcement", -1},
@@ -376,18 +376,26 @@ bool installingnow = false;
 const string exename = "Among Us.exe";
 char const* AmongUsExeFilter[1] = { exename.c_str() };
 bool locateexe() {
-	char *funny_old = tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
+	char* funny_old = tinyfd_openFileDialog("finding mungus", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Among Us\\", 1, AmongUsExeFilter, "among us exe", 0);
 
 	sfx_disappear.play();
 	//std::cout << "xd\n";
 	if (((funny_old != NULL) && (funny_old[0] == '\0')) || funny_old == NULL)
 		return false; // it was skipped
 
-	for (int i = 0; i < userdata["mods_installed"].size(); i++)
-		userdata["mods_installed"][i]["active"] = false;
-
 	// convert for funny
 	string funny = funny_old;
+
+	string filehash = hashfile(funny);
+	std::cout << "Hash: " << filehash << ".\n";
+	std::cout << "Correct Hash: " << launcherjson["amongus_exehash"] << ".\n";
+	if (filehash != launcherjson["amongus_exehash"]) {
+		MessageBox(NULL, L"Warning: Your Among Us install is not the right version!\nIf this is a mistake, report it on my Discord or Github!", L"DRAPI Mod Manager - Installation Failure", MB_ICONERROR);
+		return false;
+	}
+
+	for (int i = 0; i < userdata["mods_installed"].size(); i++)
+		userdata["mods_installed"][i]["active"] = false;
 
 	userdata["setup_properly"] = false;
 	saveuserdata();
@@ -1255,10 +1263,6 @@ int main() {
 
 	if (userdata["last_announcement"] != announcementjson["version"])
 		showannouncement();
-
-	std::cout << "Hash: " << hashfile(announcmentsdatapath) << ".\n";
-	if (hashfile(announcmentsdatapath) == launcherjson["amongus_exehash"])
-		std::cout << "EXE hashes match!\n";
 
 	while (window.isOpen()) {
 		long curTime = clock();
