@@ -41,7 +41,7 @@ json launcherjson, announcementjson;
 
 path userdatapath;
 
-const int launcherversion = 75;
+const int launcherversion = 76;
 const string launcherversionname = "2023.1.27";
 json userdata = {
 	{"last_announcement", -1},
@@ -338,7 +338,9 @@ bool clonedir(string& from, string& to) {
 bool download(string& link, string& file) {
 	if (!starts_with(link, "https:")) // prevents crashes and insecure links
 		return false;
-	URLDownloadToFile(NULL, wstring(link.begin(), link.end()).c_str(), wstring(file.begin(), file.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
+	wstring linkw = wstring(link.begin(), link.end());
+	DeleteUrlCacheEntry(linkw.c_str());
+	URLDownloadToFile(NULL, linkw.c_str(), wstring(file.begin(), file.end()).c_str(), BINDF_GETNEWESTVERSION, NULL);
 	return true;
 }
 
@@ -470,6 +472,22 @@ void showannouncement() {
 	sfx_disappear.play();
 }
 
+void showupdate() {
+	string newvers = launcherjson["launcherversion"];
+	string newvers_dashes = launcherjson["launcherversion"];
+	replace(newvers_dashes.begin(), newvers_dashes.end(), '.', '-');
+
+	cout << "Prompting an update to v" << newvers << ".\n";
+
+	string title = (string)announcementjson["title"] + " (by " + (string)announcementjson["author"] + " on " + (string)announcementjson["date"] + ")";
+	string pranked = "Hey! It appears that you're using an outdated version of the DRAPI Mod Manager!\nYour version is v" + 
+					 launcherversionname + ", but the latest is v" + newvers + "!\nWhen the Github page opens, click DRAPIMM-Installer-" + newvers_dashes
+		             + ".exe and open it when it downloads!\nThank you for using DRAPIMM!";
+	sfx_appear.play();
+	MessageBox(NULL, wstring(pranked.begin(), pranked.end()).c_str(), L"DRAPIMM Update Alert", MB_ICONINFORMATION);
+	sfx_disappear.play();
+}
+
 bool downloaddata() {
 	//cout << "We should download \"" << launcherdatalink << "\" to file \"" << ldp_wstr << "\".\n";
 	bool bConnect = InternetCheckConnection(L"https://www.google.com/", FLAG_ICC_FORCE_CONNECTION, 0);
@@ -525,6 +543,12 @@ bool downloaddata() {
 		bannertex.loadFromFile(exists(top10logic) ? top10logic : "content/graphics/nobanner.png");
 		modbanners[i] = bannertex;
 	}
+
+	int latestversion = launcherjson["version"];
+	cout << "The current version is build " << launcherversion << ", however, the latest build is " << latestversion << ".\n";
+	if (latestversion > launcherversion)
+		showupdate();
+
 	return true;
 }
 
