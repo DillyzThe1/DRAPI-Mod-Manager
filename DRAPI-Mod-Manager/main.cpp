@@ -41,8 +41,8 @@ json launcherjson, announcementjson;
 
 path userdatapath;
 
-const int launcherversion = 74;
-const string launcherversionname = "2023.1.7";
+const int launcherversion = 75;
+const string launcherversionname = "2023.1.27";
 json userdata = {
 	{"last_announcement", -1},
 	{"last_bepinex", -1},
@@ -94,15 +94,14 @@ Sprite mm_logo;
 Sprite mm_button_launch, mm_button_mods, mm_button_reinstall, mm_button_howtomod;
 
 enum MiniButtonID {
-	Announcements, 
-	Settings, 
-	Innersloth, 
-	Refresh, 
-	Discord
+	Announcements  = 0, 
+	Settings       = 75, 
+	Innersloth     = 150, 
+	Refresh        = 225, 
+	Discord        = 300
 };
 
 const MiniButtonID mbids[] = {Announcements, Settings, Innersloth, Refresh, Discord};
-const int mbrect_x[] =       {0,             75,       150,        225,     300};
 const int mbcount = (sizeof(mbids) / sizeof(*mbids));
 bool mbprevhold[mbcount];
 Sprite minibuttons[mbcount];
@@ -564,7 +563,7 @@ void scenesetup_mainmenu() {
 	for (int i = 0; i < mbcount; i++) {
 		Sprite minibutton;
 		minibutton.setTexture(mm_buttontex);
-		minibutton.setTextureRect(IntRect(mbrect_x[i], 146, s2bx, s2by));
+		minibutton.setTextureRect(IntRect(mbids[i], 146, s2bx, s2by));
 		minibuttons[i] = minibutton;
 		mbprevhold[i] = false;
 	}
