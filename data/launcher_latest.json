@@ -6,7 +6,7 @@
 	"bepinex": "https://builds.bepinex.dev/projects/bepinex_be/577/BepInEx_UnityIL2CPP_x86_ec79ad0_6.0.0-be.577.zip",
 	"amongus": 2640,
 	"amongusversion": "2022.12.14",
-	"amongus_exehash": "908fe1e7366c7e7d44d385c0e47fad50",
+	"amongus_exehash": "464e58ff3722be70101ef060154362fb",
 	"mods": [
 		{
 			"name": "DillyzRoleApi",
