@@ -41,7 +41,7 @@ json launcherjson, announcementjson;
 
 path userdatapath;
 
-const int launcherversion = 72;
+const int launcherversion = 74;
 const string launcherversionname = "2023.1.7";
 json userdata = {
 	{"last_announcement", -1},
@@ -93,7 +93,17 @@ Texture mm_buttontex, mm_logotex;
 Sprite mm_logo;
 Sprite mm_button_launch, mm_button_mods, mm_button_reinstall, mm_button_howtomod;
 
-const int mbcount = 5;
+enum MiniButtonID {
+	Announcements, 
+	Settings, 
+	Innersloth, 
+	Refresh, 
+	Discord
+};
+
+const MiniButtonID mbids[] = {Announcements, Settings, Innersloth, Refresh, Discord};
+const int mbrect_x[] = {0,               75,         150,          225,       300};
+const int mbcount = (sizeof(mbids) / sizeof(*mbids));
 bool mbprevhold[mbcount];
 Sprite minibuttons[mbcount];
 
@@ -554,7 +564,7 @@ void scenesetup_mainmenu() {
 	for (int i = 0; i < mbcount; i++) {
 		Sprite minibutton;
 		minibutton.setTexture(mm_buttontex);
-		minibutton.setTextureRect(IntRect(75*i, 146, s2bx, s2by));
+		minibutton.setTextureRect(IntRect(mbrect_x[i], 146, s2bx, s2by));
 		minibuttons[i] = minibutton;
 		mbprevhold[i] = false;
 	}
@@ -899,18 +909,18 @@ void update(float secondsPassed) {
 				if (justpressed && !installingnow && mbhold && cooldown < 0) {
 					cooldown = 1.5;
 					sfx_select.play();
-					switch (i) {
-						case 0:
+					switch (mbids[i]) {
+						case Announcements:
 							showannouncement();
 							break;
-						case 1:
+						case Settings:
 							cout << "Display settings.\n";
 							break;
-						case 2:
+						case Innersloth:
 							sfx_appear.play();
 							ShellExecuteA(NULL, "open", innerslothlink.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 							break;
-						case 3: {
+						case Refresh: {
 								downloaddata(); 
 								ifstream userdata_stream(userdatapath.string());
 								userdata = json::parse(userdata_stream);
@@ -921,7 +931,7 @@ void update(float secondsPassed) {
 									showannouncement();
 							}
 							break;
-						case 4:
+						case Discord:
 							sfx_appear.play();
 							ShellExecuteA(NULL, "open", discordlink.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 							break;
