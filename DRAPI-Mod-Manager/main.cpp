@@ -41,7 +41,7 @@ json launcherjson, announcementjson;
 
 path userdatapath;
 
-const int launcherversion = 81;
+const int launcherversion = 82;
 const string launcherversionname = "2023.1.27";
 json userdata = {
 	{"last_announcement", -1},
@@ -120,7 +120,7 @@ bool prevhov_about = false, prevhov_install = false, prevhov_issues = false, pre
 
 string versionstr = "v" + launcherversionname + " (build num " + to_string(launcherversion) + ")";
 
-IntRect installrect(0, 0, 192, 80), updaterect(200, 0, 192, 80), uninstallrect(400, 0, 192, 80);
+IntRect installrect(0, 0, 192, 80), updaterect(200, 0, 192, 80), uninstallrect(400, 0, 192, 80), unavailablerect(1000, 0, 192, 80);
 
 struct ModDependencyData {
 	string name;
@@ -152,8 +152,8 @@ struct ModData {
 	string versionname;
 	string description;
 	string author;
-
 	string source;
+	bool canbedownloaded;
 
 	int dependencycount = 0;
 	ModDependencyData dependencies[10];
@@ -162,7 +162,7 @@ struct ModData {
 		this->name = "blank";
 	}
 
-	ModData(string _name, string _file, string _banner, string _bh, int _version, string _vn, string _description, string _author, string _source) {
+	ModData(string _name, string _file, string _banner, string _bh, int _version, string _vn, string _description, string _author, string _source, bool _canbedownloaded) {
 		this->name = _name;
 		this->file = _file;
 		this->banner = _banner;
@@ -172,6 +172,7 @@ struct ModData {
 		this->description = _description;
 		this->author = _author;
 		this->source = _source;
+		this->canbedownloaded = _canbedownloaded;
 	}
 
 	void AddDependency(ModDependencyData d) {
@@ -215,8 +216,16 @@ void modmenu_move(int amt) {
 	curmodbanner.setTexture(modbanners[curmod]);
 
 	//std::cout << "getting there\n";
-	availableInstallerAction = 0;
-	modmenu_install.setTextureRect(installrect);
+	if (mods[curmod].canbedownloaded) {
+		availableInstallerAction = 0;
+		modmenu_install.setTextureRect(installrect);
+	}
+	else {
+		availableInstallerAction = -1;
+		modmenu_install.setTextureRect(unavailablerect);
+		modmenu_install.setColor(color_deselected);
+	}
+
 	for (int i = 0; i < userdata["mods_installed"].size(); i++) {
 		if (!userdata["mods_installed"][i]["active"])
 			continue;
@@ -229,7 +238,7 @@ void modmenu_move(int amt) {
 		if (name != mods[curmod].name)
 			continue;
 
-		if (l_version < mods[curmod].version) {
+		if (l_version < mods[curmod].version && mods[curmod].canbedownloaded && mods[curmod].file != "") {
 			availableInstallerAction = 1;
 			modmenu_install.setTextureRect(updaterect);
 			return;
@@ -237,6 +246,7 @@ void modmenu_move(int amt) {
 
 		availableInstallerAction = 2;
 		modmenu_install.setTextureRect(uninstallrect);
+		modmenu_install.setColor(color_white);
 		return;
 	}
 }
@@ -564,7 +574,7 @@ bool downloaddata() {
 
 		ModData mod(funnyname, launcherjson["mods"][i]["file"], banner, launcherjson["mods"][i]["bannerhash"], launcherjson["mods"][i]["version"],
 			launcherjson["mods"][i]["versionname"], launcherjson["mods"][i]["description"], 
-			launcherjson["mods"][i]["author"], launcherjson["mods"][i]["source"]);
+			launcherjson["mods"][i]["author"], launcherjson["mods"][i]["source"], launcherjson["mods"][i]["downloadable"]);
 		mods[i] = mod;
 
 		for (int o = 0; o < launcherjson["mods"][i]["dependencies"].size(); o++) {
@@ -722,6 +732,9 @@ void downloadmod(ModData mod, int action) {
 	path filedest(aumoddedpath + "/BepInEx/plugins/" + mod.name + ".dll");
 	string popuptitle = mod.name + " " + mod.versionname + " - by " + mod.author;
 	switch (action) {
+		case -1:
+			cout << "WARNING! downloadmod(ModData mod, int action) called without allowed installation?!";
+			break;
 		case 0: {
 			if (!starts_with(mod.file, "https://")) {
 				sfx_appear.play();
@@ -1080,11 +1093,14 @@ void update(float secondsPassed) {
 			break;
 		case Mods: {
 			bool hov_about = hoveringSprite(mp, modmenu_about, 192, 80);
-			bool hov_install = hoveringSprite(mp, modmenu_install, 192, 80);
+			bool hov_install = (availableInstallerAction >= 0) ? hoveringSprite(mp, modmenu_install, 192, 80) : false;
 			bool hov_issues = hoveringSprite(mp, modmenu_issues, 192, 80);
 			bool hov_sourcecode = hoveringSprite(mp, modmenu_sourcecode, 192, 50);
 			bool hov_left = hoveringSprite(mp, modmenu_left, 67, 67);
 			bool hov_right = hoveringSprite(mp, modmenu_right, 67, 67);
+
+			if (availableInstallerAction == -1)
+				modmenu_install.setColor(color_deselected);
 
 			if (curmod < 1)
 				modmenu_left.setColor(color_deselected);
@@ -1131,7 +1147,7 @@ void update(float secondsPassed) {
 						sfx_disappear.play();
 						return;
 					}
-					if (hov_install) {
+					if (hov_install && availableInstallerAction >= 0) {
 						cooldown = 1.5;
 						sfx_select.play();
 
