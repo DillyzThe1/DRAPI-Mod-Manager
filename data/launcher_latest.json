@@ -18,6 +18,7 @@
 			"versionname": "v2.1.0-dev",
 			"description": "A huge API that improves Among Us for users and modders!\nMake roles in minutes!",
 			"author": "DillyzThe1",
+			"downloadable": true,
 			"dependencies": []
 		},
 		{
@@ -30,6 +31,7 @@
 			"versionname": "v1.1.0-dev",
 			"description": "3 classic roles in one brand new package!",
 			"author": "DillyzThe1",
+			"downloadable": true,
 			"dependencies": [
 				{
 					"name": "DillyzRoleApi",
@@ -48,6 +50,7 @@
 			"versionname": "v1.0.0-dev",
 			"description": "3 of the original Dillyz roles alongside 1 brand new reimagined mod as a role!",
 			"author": "DillyzThe1",
+			"downloadable": true,
 			"dependencies": [
 				{
 					"name": "DillyzRoleApi",
@@ -66,6 +69,7 @@
 			"versionname": "v1.0.0-dev",
 			"description": "bruh who gave the impostors pipebomb privileges AGAIN?!\nthey can even pipebomb vents?!\nwell, at least they don't have a kill button...\n(unless you enable it but we don't talk about that).",
 			"author": "Impostor5875",
+			"downloadable": false,
 			"dependencies": [
 				{
 					"name": "DillyzRoleApi",
