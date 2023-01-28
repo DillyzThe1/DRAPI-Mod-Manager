@@ -41,7 +41,7 @@ json launcherjson, announcementjson;
 
 path userdatapath;
 
-const int launcherversion = 82;
+const int launcherversion = 83;
 const string launcherversionname = "2023.1.27";
 json userdata = {
 	{"last_announcement", -1},
@@ -54,7 +54,8 @@ json userdata = {
 			{"name", "DillyzRoleApi"},
 			{"last_version", -1},
 			{"last_versionname", "v0.0.0-dev"},
-			{"active", true}
+			{"last_banner", -1},
+			{"active", true},
 		}
 	}}
 };
@@ -147,7 +148,7 @@ struct ModData {
 	string name;
 	string file;
 	string banner;
-	string bannerhash;
+	int bannervers;
 	int version;
 	string versionname;
 	string description;
@@ -162,11 +163,11 @@ struct ModData {
 		this->name = "blank";
 	}
 
-	ModData(string _name, string _file, string _banner, string _bh, int _version, string _vn, string _description, string _author, string _source, bool _canbedownloaded) {
+	ModData(string _name, string _file, string _banner, int _bv, int _version, string _vn, string _description, string _author, string _source, bool _canbedownloaded) {
 		this->name = _name;
 		this->file = _file;
 		this->banner = _banner;
-		this->bannerhash = _bh;
+		this->bannervers = _bv;
 		this->version = _version;
 		this->versionname = _vn;
 		this->description = _description;
@@ -547,7 +548,7 @@ bool downloaddata() {
 	remove(announcmentsdatapath);
 	download(launcherdataURL, launcherdatapath);
 	download(announcmentdataURL, announcmentsdatapath);
-	
+
 	ifstream launcherjson_stream(launcherdatapath);
 	launcherjson = json::parse(launcherjson_stream);
 	launcherjson_stream.close();
@@ -572,7 +573,7 @@ bool downloaddata() {
 
 		modsactive++;
 
-		ModData mod(funnyname, launcherjson["mods"][i]["file"], banner, launcherjson["mods"][i]["bannerhash"], launcherjson["mods"][i]["version"],
+		ModData mod(funnyname, launcherjson["mods"][i]["file"], banner, launcherjson["mods"][i]["bannervers"], launcherjson["mods"][i]["version"],
 			launcherjson["mods"][i]["versionname"], launcherjson["mods"][i]["description"], 
 			launcherjson["mods"][i]["author"], launcherjson["mods"][i]["source"], launcherjson["mods"][i]["downloadable"]);
 		mods[i] = mod;
@@ -583,11 +584,36 @@ bool downloaddata() {
 			mods[i].AddDependency(dependency);
 		}
 
+		int bannerversion = -1;
+		bool didntfindthemodbefore = true;
+		int modsinstalledindex = userdata["mods_installed"].size();
+
+		for (int o = 0; o < userdata["mods_installed"].size(); o++)
+			if (userdata["mods_installed"][o]["name"] == funnyname) {
+				didntfindthemodbefore = false;
+				modsinstalledindex = o;
+				bannerversion = userdata["mods_installed"][o]["last_banner"];
+				cout << funnyname << endl;
+			}
+
+		//cout << "current " << funnyname << " banner vers: " << bannerversion << ". latest: " << mod.bannervers << ".\n";
+
 		// don't redownload a pre-existing banner
-		if (!exists(top10logic) && starts_with(banner, "https://"))
+		if ((!exists(top10logic) || mod.bannervers > bannerversion) && starts_with(banner, "https://")) {
+			cout << "gotta download a new banner\n";
 			download(banner, top10logic);
+		}
 		//else
 		//	std::cout << banner << " doesn't start with https://\n";
+
+		if (didntfindthemodbefore) {
+			userdata["mods_installed"][modsinstalledindex]["name"] = mod.name;
+			userdata["mods_installed"][modsinstalledindex]["last_version"] = -1;
+			userdata["mods_installed"][modsinstalledindex]["last_versionname"] = "none";
+			userdata["mods_installed"][modsinstalledindex]["active"] = false;
+		}
+		userdata["mods_installed"][modsinstalledindex]["last_banner"] = mod.bannervers;
+		saveuserdata();
 
 		Texture bannertex;
 		bannertex.loadFromFile(exists(top10logic) ? top10logic : "content/graphics/nobanner.png");
@@ -1018,7 +1044,7 @@ void update(float secondsPassed) {
 							ShellExecuteA(NULL, "open", innerslothlink.c_str(), NULL, NULL, SW_SHOWDEFAULT);
 							break;
 						case Refresh: {
-								downloaddata(); 
+								downloaddata();
 								ifstream userdata_stream(userdatapath.string());
 								userdata = json::parse(userdata_stream);
 								userdata_stream.close();
