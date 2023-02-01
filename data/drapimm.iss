@@ -8,7 +8,7 @@
 
 [Setup]
 AppName=DillyzRoleApi Mod Manager
-AppVersion=1.0.0
+AppVersion=2023.1.31
 AppPublisher=DillyzThe1
 AppPublisherURL=https://github.com/DillyzThe1
 WizardStyle=modern
@@ -18,7 +18,7 @@ UninstallDisplayIcon={app}\DRAPIMM_Uninstall.exe
 Compression=lzma2
 SolidCompression=yes
 OutputDir=userdocs:inno setup
-OutputBaseFilename=DRAPIMM-Installer-1.0.0
+OutputBaseFilename=DRAPIMM-Installer-2023-1-31
 SetupIconFile=..\DRAPI-Mod-Manager\icon1.ico
 ; "ArchitecturesAllowed=x64" specifies that Setup cannot run on
 ; anything but x64.
