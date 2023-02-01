@@ -41,8 +41,8 @@ json launcherjson, announcementjson;
 
 path userdatapath;
 
-const int launcherversion = 83;
-const string launcherversionname = "2023.1.27";
+const int launcherversion = 84;
+const string launcherversionname = "2023.1.31";
 json userdata = {
 	{"last_announcement", -1},
 	{"last_bepinex", -1},
