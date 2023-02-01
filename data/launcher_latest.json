@@ -42,7 +42,7 @@
 		},
 		{
 			"name": "DillyzLegacyPack",
-			"file": "https://github.com/DillyzThe1/DillyzLegacyPack/releases/download/v1.0.0/DillyzLegacyPack.dll,
+			"file": "https://github.com/DillyzThe1/DillyzLegacyPack/releases/download/v1.0.0/DillyzLegacyPack.dll",
 			"banner": "https://raw.githubusercontent.com/DillyzThe1/DRAPI-Mod-Manager/main/data/banners/legacy.png",
 			"source": "https://github.com/DillyzThe1/DillyzLegacyPack",
 			"bannervers": 0,

@@ -1,7 +1,7 @@
 {
-	"version": 1,
-	"date": "1/7/2023",
-	"title": "Hey! I'm in your walls!",
+	"version": 2,
+	"date": "1/31/2023",
+	"title": "Welcome to DRAPI Mod Manager!",
 	"author": "DillyzThe1",
-	"text": "Heyo!\nI see you've either managed to compile this or grab a dev build.\nThat's interesting! Welcome to the program!\nHere, you can set up mods in under 2 minutes to play.\n\nHit the 'mods' button, click install, and launch it!\nOf course, don't forget to install the client first."
+	"text": "Heyo!\nWelcome to the first public release of DRAPI Mod Manager!\nYou may use this launcher to play Among Us mods that devs have requested to have been added!\nHave fun!"
 }
