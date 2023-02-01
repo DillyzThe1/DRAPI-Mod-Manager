@@ -1,5 +1,6 @@
 # DRAPI Mod Manager
-An all in one launcher for all of my Among Us mods, including those of general usage to the API!
+An all in one launcher for all of my Among Us mods, including those of general usage to the API!<br>
+*Fun fact: If you open Ctrl + O on the launcher, you'll open the LocalLow folder where the cache and clone is stored!*
 
 # Installation
 Head over to the [mod manager's releases page](https://github.com/DillyzThe1/DRAPI-Mod-Manager/releases) & download the installer exe.<br>
