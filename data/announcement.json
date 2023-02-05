@@ -1,7 +1,7 @@
 {
-	"version": 2,
-	"date": "1/31/2023",
-	"title": "Welcome to DRAPI Mod Manager!",
+	"version": 3,
+	"date": "2/4/2023",
+	"title": "API & Legacy Pack Update Notice",
 	"author": "DillyzThe1",
-	"text": "Heyo!\nWelcome to the first public release of DRAPI Mod Manager!\nYou may use this launcher to play Among Us mods that devs have requested to have been added!\nHave fun!"
+	"text": "Hey! Small Update!\nI've noticed that some features were missing in the api and a slight bug was present in the legacy pack, so I've released new version for you guys to use!\nHave fun!"
 }
